@@ -1,0 +1,19 @@
+module Basic;
+
+import Other;
+
+type Foo {
+   someField : Int;
+   someOtherField : Maybe(Bool);
+   person : Other.Person;
+}
+
+type Bar<t> {
+   someField : t;
+   moreFields : Int;
+}
+
+enum Psy {
+   Simple;
+   Tagged(Foo);
+}

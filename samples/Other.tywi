@@ -1,0 +1,6 @@
+module Other;
+
+type Person {
+  name : String;
+  age : Int;
+}
