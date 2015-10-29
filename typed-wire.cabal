@@ -1,6 +1,6 @@
 name:                typed-wire
 version:             0.1.0.0
-synopsis:            Language idependent type-safe communication
+synopsis:            WIP: Language idependent type-safe communication
 description:         Please see README.md
 homepage:            http://github.com/agrafix/typed-wire#readme
 license:             MIT

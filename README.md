@@ -6,14 +6,7 @@ typed-wire
 
 ## Intro
 
-
-Language idependent type-safe communication
-
-## Cli Usage: twirec
-
-```sh
-$ twirec --help
-```
+WIP: Language idependent type-safe communication
 
 ## Install
 
