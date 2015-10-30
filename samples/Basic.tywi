@@ -4,7 +4,8 @@ import Other;
 
 type Foo {
    someField : Int;
-   someOtherField : Maybe(Bool);
+   someOtherField : Maybe<Bool>;
+   barBool : Bar<Bool>;
    person : Other.Person;
 }
 
@@ -16,4 +17,10 @@ type Bar<t> {
 enum Psy {
    Simple;
    Tagged(Foo);
+}
+
+enum FooOrBar<t> {
+    Foo(Foo);
+    BarInt(Bar<Int>);
+    BarGeneral(Bar<t>);
 }

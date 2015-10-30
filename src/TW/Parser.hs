@@ -96,7 +96,7 @@ parseType =
     TyCon <$> parseQualTypeName <*> parseTyArgs
     where
       parseTyArgs =
-          option [] $ parens $ commaSep1 parseType
+          option [] $ angles $ commaSep1 parseType
 
 parseTypeArgs :: Parser [TypeVar]
 parseTypeArgs =
