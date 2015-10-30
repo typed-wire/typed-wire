@@ -9,6 +9,8 @@ import TW.JsonRepr
 
 import Data.Maybe
 import Data.Monoid
+import System.FilePath
+import qualified Data.List as L
 import qualified Data.Text as T
 
 jsonEncQual :: T.Text
@@ -25,8 +27,7 @@ jsonDec x = jsonDecQual <> "." <> x
 
 makeFileName :: ModuleName -> FilePath
 makeFileName (ModuleName parts) =
-    T.unpack $
-    T.intercalate "." parts <> ".elm"
+    (L.foldl' (</>) "" $ map T.unpack parts) ++ ".elm"
 
 makeModule :: Module -> T.Text
 makeModule m =

@@ -10,6 +10,8 @@ import TW.JsonRepr
 import Data.Char
 import Data.Maybe
 import Data.Monoid
+import System.FilePath
+import qualified Data.List as L
 import qualified Data.Text as T
 
 aesonQual :: T.Text
@@ -20,8 +22,7 @@ aeson x = aesonQual <> "." <> x
 
 makeFileName :: ModuleName -> FilePath
 makeFileName (ModuleName parts) =
-    T.unpack $
-    T.intercalate "." parts <> ".hs"
+    (L.foldl' (</>) "" $ map T.unpack parts) ++ ".hs"
 
 makeModule :: Module -> T.Text
 makeModule m =
