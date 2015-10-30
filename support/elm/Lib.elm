@@ -19,7 +19,7 @@ jencDate (Date str) = JE.string str
 
 type Time = Time String
 jdecTime : JD.Decoder Time
-jdecTime = JD.map AsBase64 JD.string
+jdecTime = JD.map Time JD.string
 
 jencTime : Time -> JE.Value
 jencTime (Time str) = JE.string str
