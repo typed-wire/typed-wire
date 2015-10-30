@@ -1,13 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 module TW.BuiltIn
     ( BuiltIn(..)
-    , allBuiltIns
+    , allBuiltIns, isBuiltIn
     , tyString, tyInt, tyFloat, tyBool, tyMaybe
     )
 where
 
 import TW.Ast
 
+import qualified Data.List as L
 import qualified Data.Text as T
 
 data BuiltIn
@@ -18,6 +19,16 @@ data BuiltIn
 
 allBuiltIns :: [BuiltIn]
 allBuiltIns = [tyString, tyInt, tyFloat, tyBool, tyMaybe]
+
+isBuiltIn :: Type -> Maybe (BuiltIn, [Type])
+isBuiltIn ty =
+    case ty of
+      TyVar _ -> Nothing
+      TyCon qt args ->
+          let r = flip L.find allBuiltIns $ \bi -> bi_name bi == qt && length (bi_args bi) == length args
+          in case r of
+               Just x -> Just (x, args)
+               _ -> Nothing
 
 builtIn :: T.Text -> BuiltIn
 builtIn = flip builtInVars []

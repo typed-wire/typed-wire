@@ -34,6 +34,7 @@ makeModule m =
     , ""
     , "import Control.Monad (join)"
     , "import qualified Data.Aeson as " <> aesonQual
+    , "import qualified Data.Text as T"
     , ""
     , T.intercalate "\n" (map makeTypeDef $ m_typeDefs m)
     ]
@@ -149,13 +150,23 @@ makeStructField prefix sf =
 
 makeType :: Type -> T.Text
 makeType t =
-    case t of
-      TyVar (TypeVar x) -> x
-      TyCon qt args ->
-          let ty = makeQualTypeName qt
-          in case args of
-               [] -> ty
-               _ -> "(" <> ty <> " " <> T.intercalate " " (map makeType args) <> ")"
+    case isBuiltIn t of
+      Nothing ->
+          case t of
+            TyVar (TypeVar x) -> x
+            TyCon qt args ->
+                let ty = makeQualTypeName qt
+                in case args of
+                     [] -> ty
+                     _ -> "(" <> ty <> " " <> T.intercalate " " (map makeType args) <> ")"
+      Just (bi, tvars)
+          | bi == tyString -> "T.Text"
+          | bi == tyInt -> "Int"
+          | bi == tyBool -> "Bool"
+          | bi == tyFloat -> "Double"
+          | bi == tyMaybe -> "(Maybe " <> T.intercalate " " (map makeType tvars) <> ")"
+          | otherwise ->
+              error $ "Elm: Unimplemented built in type: " ++ show t
 
 makeQualTypeName :: QualTypeName -> T.Text
 makeQualTypeName qtn =
