@@ -20,6 +20,12 @@ aesonQual = "Data_Aeson_Lib"
 aeson :: T.Text -> T.Text
 aeson x = aesonQual <> "." <> x
 
+aesonTQual :: T.Text
+aesonTQual = "Data_Aeson_Types"
+
+aesonT :: T.Text -> T.Text
+aesonT x = aesonTQual <> "." <> x
+
 makeFileName :: ModuleName -> FilePath
 makeFileName (ModuleName parts) =
     (L.foldl' (</>) "" $ map T.unpack parts) ++ ".hs"
@@ -36,6 +42,7 @@ makeModule m =
     , "import Control.Applicative"
     , "import Control.Monad (join)"
     , "import qualified Data.Aeson as " <> aesonQual
+    , "import qualified Data.Aeson.Types as " <> aesonTQual
     , "import qualified Data.Text as T"
     , ""
     , T.intercalate "\n" (map makeTypeDef $ m_typeDefs m)
@@ -117,18 +124,18 @@ makeEnumDef ed =
     , "        " <> aeson "withObject" <> " " <> T.pack (show $ unTypeName (ed_name ed)) <> " $ \\obj ->"
     , "        " <> T.intercalate "\n        <|> " (map mkFromJsonChoice $ ed_choices ed)
     , "        where"
-    , "           eatBool :: Monad m => m Bool -> m ()"
+    , "           eatBool :: Bool -> " <> aesonT "Parser" <> " ()"
     , "           eatBool _ = return ()"
     ]
     where
       mkFromJsonChoice ec =
           let constr = unChoiceName $ ec_name ec
               tag = camelTo2 '_' $ T.unpack constr
-              op =
+              (op, opEnd) =
                   case ec_arg ec of
-                    Nothing -> "<$ eatBool =<<"
-                    Just _ -> "<$>"
-          in "(" <> constr <> " " <> op <> " obj " <> (aeson ".:") <> " " <> T.pack (show tag) <> ")"
+                    Nothing -> ("<$ (eatBool <$> (", "))")
+                    Just _ -> ("<$>", "")
+          in "(" <> constr <> " " <> op <> " obj " <> (aeson ".:") <> " " <> T.pack (show tag) <> opEnd <> ")"
       mkToJsonChoice ec =
           let constr = unChoiceName $ ec_name ec
               tag = camelTo2 '_' $ T.unpack constr
