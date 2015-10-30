@@ -1,12 +1,16 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell #-}
 module TW.CodeGen.Elm
-    ( makeFileName, makeModule )
+    ( makeFileName, makeModule
+    , makeLibraryModule
+    )
 where
 
 import TW.Ast
 import TW.BuiltIn
 import TW.JsonRepr
 
+import Data.FileEmbed
 import Data.Maybe
 import Data.Monoid
 import System.FilePath
@@ -25,6 +29,12 @@ jsonDecQual = "JD"
 jsonDec :: T.Text -> T.Text
 jsonDec x = jsonDecQual <> "." <> x
 
+makeLibraryModule :: (FilePath, T.Text)
+makeLibraryModule =
+    ( "TW/Support/Lib.elm"
+    , $(embedStringFile "support/elm/Lib.elm")
+    )
+
 makeFileName :: ModuleName -> FilePath
 makeFileName (ModuleName parts) =
     (L.foldl' (</>) "" $ map T.unpack parts) ++ ".elm"
@@ -37,6 +47,7 @@ makeModule m =
     , ""
     , T.intercalate "\n" (map makeImport $ m_imports m)
     , ""
+    , "import TW.Support.Lib as ELib"
     , "import Json.Decode as " <> jsonDecQual
     , "import Json.Decode exposing ((:=))"
     , "import Json.Encode as " <> jsonEncQual
@@ -65,13 +76,9 @@ makeStructDef sd =
     , ""
     , "jenc" <> unTypeName (sd_name sd) <> " : " <> encTy <> fullType <> " -> " <> jsonEnc "Value"
     , "jenc" <> unTypeName (sd_name sd) <> " " <> encArgs <> " x ="
-    , "    let packMaybe enc y ="
-    , "           case y of"
-    , "               Just val -> enc y"
-    , "               Nothing -> " <> jsonEnc "null"
-    , "    in " <> jsonEnc "object"
-    , "       [ " <> T.intercalate "\n       , " (map makeToJsonFld $ sd_fields sd)
-    , "       ]"
+    , "    " <> jsonEnc "object"
+    , "    [ " <> T.intercalate "\n    , " (map makeToJsonFld $ sd_fields sd)
+    , "    ]"
     , "jdec" <> unTypeName (sd_name sd) <> " : " <> jsonDec "Decoder" <> " (" <> fullType <> ")"
     , "jdec" <> unTypeName (sd_name sd) <> " ="
     , "    " <> T.intercalate "\n    " (map makeFromJsonFld $ sd_fields sd)
@@ -122,12 +129,8 @@ makeEnumDef ed =
     , ""
     , "jenc" <> unTypeName (ed_name ed) <> " : " <> encTy <> fullType <> " -> " <> jsonEnc "Value"
     , "jenc" <> unTypeName (ed_name ed) <> " " <> encArgs <> " x ="
-    , "    let packMaybe enc y ="
-    , "           case y of"
-    , "               Just val -> enc y"
-    , "               Nothing -> " <> jsonEnc "null"
-    , "    in case x of"
-    , "         " <> T.intercalate "\n         " (map mkToJsonChoice $ ed_choices ed)
+    , "    case x of"
+    , "      " <> T.intercalate "\n      " (map mkToJsonChoice $ ed_choices ed)
     , "jdec" <> unTypeName (ed_name ed) <> " : " <> jsonDec "Decoder" <> " (" <> fullType <> ")"
     , "jdec" <> unTypeName (ed_name ed) <> " ="
     , "    " <> jsonDec "oneOf"
@@ -184,9 +187,10 @@ jsonEncFor t =
           | bi == tyInt -> jsonEnc "int"
           | bi == tyBool -> jsonEnc "bool"
           | bi == tyFloat -> jsonEnc "float"
+          | bi == tyBytes -> "ELib.jencAsBase64"
           | bi == tyMaybe ->
               case tvars of
-                [arg] -> "packMaybe (" <> jsonEncFor arg <> ")"
+                [arg] -> "ELib.packMaybe (" <> jsonEncFor arg <> ")"
                 _ -> error $ "Elm: odly shaped Maybe value"
           | otherwise ->
               error $ "Elm: Missing jsonEnc for built in type: " ++ show t
@@ -207,6 +211,7 @@ jsonDecFor t =
           | bi == tyInt -> jsonDec "int"
           | bi == tyBool -> jsonDec "bool"
           | bi == tyFloat -> jsonDec "float"
+          | bi == tyBytes -> "ELib.jdecAsBase64"
           | bi == tyMaybe ->
               case tvars of
                 [arg] -> jsonDec "maybe" <> " (" <> jsonDecFor arg <> ")"
@@ -237,6 +242,7 @@ makeType t =
           | bi == tyBool -> "Bool"
           | bi == tyFloat -> "Float"
           | bi == tyMaybe -> "(Maybe " <> T.intercalate " " (map makeType tvars) <> ")"
+          | bi == tyBytes -> "ELib.AsBase64"
           | otherwise ->
               error $ "Elm: Unimplemented built in type: " ++ show t
 

@@ -18,6 +18,7 @@ import System.Directory
 import System.FilePath
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
+import qualified Data.Traversable as T
 import qualified Data.Version as Vers
 
 data Options
@@ -102,18 +103,23 @@ run' opts =
              case checkModules ok of
                Left err -> fail err
                Right readyModules ->
-                   forM_ readyModules $ \m ->
-                   do case o_hsOutDir opts of
-                        Just dir ->
-                            runner m dir HS.makeModule HS.makeFileName
-                        Nothing -> return ()
-                      case o_elmOutDir opts of
-                        Just dir ->
-                            runner m dir Elm.makeModule Elm.makeFileName
-                        Nothing -> return ()
+                   do _ <- T.forM (o_hsOutDir opts) $ \dir ->
+                          do storeLib dir HS.makeLibraryModule
+                             mapM_ (runner dir HS.makeModule HS.makeFileName) readyModules
+                      _ <- T.forM (o_elmOutDir opts) $ \dir ->
+                          do storeLib dir Elm.makeLibraryModule
+                             mapM_ (runner dir Elm.makeModule Elm.makeFileName) readyModules
+                      return ()
 
-runner :: Module -> FilePath -> (Module -> T.Text) -> (ModuleName -> FilePath) -> IO ()
-runner m baseDir mkModule mkFilename =
+storeLib :: FilePath -> (FilePath, T.Text) -> IO ()
+storeLib baseDir (baseLoc, content) =
+    do let loc = baseDir </> baseLoc
+       createDirectoryIfMissing True (takeDirectory loc)
+       putStrLn $ "Writing library " <> loc <> " ..."
+       T.writeFile loc content
+
+runner :: FilePath -> (Module -> T.Text) -> (ModuleName -> FilePath) -> Module -> IO ()
+runner baseDir mkModule mkFilename m =
     let moduleSrc = mkModule m
         moduleFp = baseDir </> mkFilename (m_name m)
     in do createDirectoryIfMissing True (takeDirectory moduleFp)

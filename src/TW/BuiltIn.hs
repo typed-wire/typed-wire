@@ -2,7 +2,7 @@
 module TW.BuiltIn
     ( BuiltIn(..)
     , allBuiltIns, isBuiltIn
-    , tyString, tyInt, tyFloat, tyBool, tyMaybe
+    , tyString, tyInt, tyFloat, tyBool, tyMaybe, tyBytes
     )
 where
 
@@ -18,7 +18,7 @@ data BuiltIn
    } deriving (Show, Eq)
 
 allBuiltIns :: [BuiltIn]
-allBuiltIns = [tyString, tyInt, tyFloat, tyBool, tyMaybe]
+allBuiltIns = [tyString, tyInt, tyFloat, tyBool, tyMaybe, tyBytes]
 
 isBuiltIn :: Type -> Maybe (BuiltIn, [Type])
 isBuiltIn ty =
@@ -50,3 +50,6 @@ tyFloat = builtIn "Float"
 
 tyMaybe :: BuiltIn
 tyMaybe = builtInVars "Maybe" ["a"]
+
+tyBytes :: BuiltIn
+tyBytes = builtIn "Bytes"
