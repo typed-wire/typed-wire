@@ -14,6 +14,7 @@ import qualified Paths_typed_wire as Meta
 import Control.Monad
 import Development.GitRev
 import Options.Applicative
+import System.Directory
 import System.FilePath
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
@@ -94,6 +95,7 @@ run opts =
 run' :: Options -> IO ()
 run' opts =
     do allModules <- loadModules (o_sourceDirs opts) (o_entryPoints opts)
+       putStrLn "All modules loaded"
        case allModules of
          Left err -> fail err
          Right ok ->
@@ -103,28 +105,17 @@ run' opts =
                    forM_ readyModules $ \m ->
                    do case o_hsOutDir opts of
                         Just dir ->
-                            let moduleSrc = HS.makeModule m
-                                moduleFp = dir </> HS.makeFileName (m_name m)
-                            in do putStrLn $ "Writing " ++ moduleFp ++ "..."
-                                  T.writeFile moduleFp moduleSrc
+                            runner m dir HS.makeModule HS.makeFileName
                         Nothing -> return ()
                       case o_elmOutDir opts of
                         Just dir ->
-                            let moduleSrc = Elm.makeModule m
-                                moduleFp = dir </> Elm.makeFileName (m_name m)
-                            in do putStrLn $ "Writing " ++ moduleFp ++ "..."
-                                  T.writeFile moduleFp moduleSrc
+                            runner m dir Elm.makeModule Elm.makeFileName
                         Nothing -> return ()
 
-{-
-main :: IO ()
-main =
-    do allModules <- loadModules ["samples"] [ModuleName ["Basic"]]
-       case allModules of
-         Left err -> fail err
-         Right ok ->
-             case checkModules ok of
-               Left err -> fail err
-               Right readyModules ->
-                   forM_ readyModules (putStrLn . T.unpack . HS.makeModule)
--}
+runner :: Module -> FilePath -> (Module -> T.Text) -> (ModuleName -> FilePath) -> IO ()
+runner m baseDir mkModule mkFilename =
+    let moduleSrc = mkModule m
+        moduleFp = baseDir </> mkFilename (m_name m)
+    in do createDirectoryIfMissing True (takeDirectory moduleFp)
+          putStrLn $ "Writing " ++ moduleFp ++ " ..."
+          T.writeFile moduleFp moduleSrc
