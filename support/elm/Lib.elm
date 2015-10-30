@@ -31,7 +31,6 @@ jdecDateTime = JD.map DateTime JD.string
 jencDateTime : DateTime -> JE.Value
 jencDateTime (DateTime str) = JE.string str
 
-
 encMaybe : (a -> JE.Value) -> Maybe a -> JE.Value
 encMaybe f v =
     case v of

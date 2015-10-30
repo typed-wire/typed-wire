@@ -197,7 +197,7 @@ jsonEncFor t =
                 _ -> error $ "Elm: odly shaped List value"
           | bi == tyMaybe ->
               case tvars of
-                [arg] -> "ELib.packMaybe (" <> jsonEncFor arg <> ")"
+                [arg] -> "ELib.encMaybe (" <> jsonEncFor arg <> ")"
                 _ -> error $ "Elm: odly shaped Maybe value"
           | otherwise ->
               error $ "Elm: Missing jsonEnc for built in type: " ++ show t
