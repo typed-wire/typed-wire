@@ -22,7 +22,8 @@ library
                   TW.Ast,
                   TW.Loader,
                   TW.Check,
-                  TW.BuiltIn
+                  TW.BuiltIn,
+                  TW.JsonRepr,
                   TW.CodeGen.Haskell
   build-depends:
                 base >= 4.7 && < 5,
@@ -41,7 +42,9 @@ executable twirec
   build-depends:
                 base >= 4.7 && < 5,
                 typed-wire,
-                text >= 1.2
+                text >= 1.2,
+                optparse-applicative,
+                filepath >=1.4
   default-language:    Haskell2010
 
 source-repository head

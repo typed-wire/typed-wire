@@ -2,6 +2,7 @@
 module TW.Parser
     ( moduleFromText
     , moduleFromFile
+    , makeModuleName
     )
 where
 
@@ -16,9 +17,15 @@ import qualified Text.Parsec.Token as P
 
 type Parser = Parsec T.Text ()
 
+makeModuleName :: T.Text -> Either String ModuleName
+makeModuleName inp =
+    case runParser (parseModuleName <* eof) () "<input>" inp of
+      Left err -> Left (show err)
+      Right m -> Right m
+
 moduleFromText :: FilePath -> T.Text -> Either String Module
 moduleFromText file t =
-    case runParser parseModule () file t of
+    case runParser (parseModule <* eof) () file t of
       Left err -> Left (show err)
       Right m -> Right m
 

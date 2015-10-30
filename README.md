@@ -6,7 +6,27 @@ typed-wire
 
 ## Intro
 
+
 WIP: Language idependent type-safe communication
+
+## Cli Usage: twirec
+
+```sh
+$ twirec --help
+Generate bindings using typed-wire for different languages
+
+Usage: twirec [-i|--include-dir DIR] [-e|--entrypoint MODULE-NAME]
+              [--hs-out DIR]
+  Language idependent type-safe communication
+
+Available options:
+  -h,--help                Show this help text
+  -i,--include-dir DIR     Directory to search for modules
+  -e,--entrypoint MODULE-NAME
+                           Entrypoint for compiler
+  --hs-out DIR             Generate Haskell bindings to specified dir
+
+```
 
 ## Install
 
