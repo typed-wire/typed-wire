@@ -32,7 +32,7 @@ data Options
 optParser :: Parser Options
 optParser =
     Options
-    <$> switch (long "version" <> help "show version and exit")
+    <$> switch (long "version" <> help "Show version and exit")
     <*> sourceDirsP
     <*> entryPointsP
     <*> hsOutP
