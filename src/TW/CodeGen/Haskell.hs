@@ -49,6 +49,7 @@ makeModule m =
     , "import Control.Monad (join)"
     , "import qualified Data.Aeson as " <> aesonQual
     , "import qualified Data.Text as T"
+    , "import qualified Data.Vector as V"
     , ""
     , T.intercalate "\n" (map makeTypeDef $ m_typeDefs m)
     ]
@@ -177,6 +178,7 @@ makeType t =
           | bi == tyFloat -> "Double"
           | bi == tyMaybe -> "(Maybe " <> T.intercalate " " (map makeType tvars) <> ")"
           | bi == tyBytes -> "HLib.AsBase64"
+          | bi == tyList -> "(V.Vector " <> T.intercalate " " (map makeType tvars) <> ")"
           | otherwise ->
               error $ "Elm: Unimplemented built in type: " ++ show t
 

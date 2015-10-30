@@ -188,6 +188,10 @@ jsonEncFor t =
           | bi == tyBool -> jsonEnc "bool"
           | bi == tyFloat -> jsonEnc "float"
           | bi == tyBytes -> "ELib.jencAsBase64"
+          | bi == tyList ->
+              case tvars of
+                [arg] -> jsonEnc "list" <> " (" <> jsonEncFor arg <> ")"
+                _ -> error $ "Elm: odly shaped List value"
           | bi == tyMaybe ->
               case tvars of
                 [arg] -> "ELib.packMaybe (" <> jsonEncFor arg <> ")"
@@ -212,6 +216,10 @@ jsonDecFor t =
           | bi == tyBool -> jsonDec "bool"
           | bi == tyFloat -> jsonDec "float"
           | bi == tyBytes -> "ELib.jdecAsBase64"
+          | bi == tyList ->
+              case tvars of
+                [arg] -> jsonDec "list" <> " (" <> jsonDecFor arg <> ")"
+                _ -> error $ "Elm: odly shaped List value"
           | bi == tyMaybe ->
               case tvars of
                 [arg] -> jsonDec "maybe" <> " (" <> jsonDecFor arg <> ")"
@@ -242,6 +250,7 @@ makeType t =
           | bi == tyBool -> "Bool"
           | bi == tyFloat -> "Float"
           | bi == tyMaybe -> "(Maybe " <> T.intercalate " " (map makeType tvars) <> ")"
+          | bi == tyList -> "(List " <> T.intercalate " " (map makeType tvars) <> ")"
           | bi == tyBytes -> "ELib.AsBase64"
           | otherwise ->
               error $ "Elm: Unimplemented built in type: " ++ show t

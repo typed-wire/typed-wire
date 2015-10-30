@@ -11,7 +11,6 @@ import qualified TW.CodeGen.Haskell as HS
 
 import qualified Paths_typed_wire as Meta
 
-import Control.Monad
 import Development.GitRev
 import Options.Applicative
 import System.Directory
