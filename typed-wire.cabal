@@ -24,6 +24,7 @@ library
                   TW.Check,
                   TW.BuiltIn,
                   TW.JsonRepr,
+                  TW.CodeGen.Elm,
                   TW.CodeGen.Haskell
   build-depends:
                 base >= 4.7 && < 5,

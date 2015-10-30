@@ -6,6 +6,7 @@ import TW.Loader
 import TW.Check
 import TW.Parser
 import qualified TW.CodeGen.Haskell as HS
+import qualified TW.CodeGen.Elm as Elm
 
 import System.FilePath
 import Control.Monad
@@ -18,6 +19,7 @@ data Options
    { o_sourceDirs :: [FilePath]
    , o_entryPoints :: [ModuleName]
    , o_hsOutDir :: Maybe FilePath
+   , o_elmOutDir :: Maybe FilePath
    }
 
 optParser :: Parser Options
@@ -26,6 +28,7 @@ optParser =
     <$> sourceDirsP
     <*> entryPointsP
     <*> hsOutP
+    <*> elmOutP
 
 sourceDirsP :: Parser [FilePath]
 sourceDirsP =
@@ -46,6 +49,11 @@ hsOutP :: Parser (Maybe FilePath)
 hsOutP =
     optional $ strOption $
     long "hs-out" <> metavar "DIR" <> help "Generate Haskell bindings to specified dir"
+
+elmOutP :: Parser (Maybe FilePath)
+elmOutP =
+    optional $ strOption $
+    long "elm-out" <> metavar "DIR" <> help "Generate Elm bindings to specified dir"
 
 main :: IO ()
 main =
@@ -72,6 +80,13 @@ run opts =
                         Just dir ->
                             let moduleSrc = HS.makeModule m
                                 moduleFp = dir </> HS.makeFileName (m_name m)
+                            in do putStrLn $ "Writing " ++ moduleFp ++ "..."
+                                  T.writeFile moduleFp moduleSrc
+                        Nothing -> return ()
+                      case o_elmOutDir opts of
+                        Just dir ->
+                            let moduleSrc = Elm.makeModule m
+                                moduleFp = dir </> Elm.makeFileName (m_name m)
                             in do putStrLn $ "Writing " ++ moduleFp ++ "..."
                                   T.writeFile moduleFp moduleSrc
                         Nothing -> return ()
