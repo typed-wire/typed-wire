@@ -15,13 +15,15 @@ install:
 - stack build --only-snapshot --no-terminal
 script:
 - stack build --pedantic --no-terminal
-after_success:
-- cp $(stack exec -- which twirec) $HOME/twirec-x86_64-linux
+before_deploy:
+  - export RELEASE_FILE=$(stack exec -- which twirec)
+  - echo "Binary $RELEASE_FILE will be deployed to GitHub"
 deploy:
   - provider: releases
     api_key:
       secure: fTRzmC53IsYLJKX7jHFoo7wQEWagoDEihJ/3wSH40vzzLI7LgyrLR0eS9H92NVrk31v//IxRVNd5I6RE/8i1V4NO4VdxhjM2BP+painMemgCIxX6hhP+IF1q8+x4vtOFD4WvN+6UmJNI+K4o0WjfFjIaXpkxqJgmF7lrF9fzuOdTSj76ZsdO51WNrRFVDRAbf94eLoJbGkTeAFJiPUbI+LQ/AQcHrw7VFB/XkMmTc4bUJMMXmdkxk7RRU2Vma2t7sY/JNhcSajeHIYiMjHe0M9+x3cbPRwriOEmJUeccBg0+sA8UTTji3H+UEhAI1pIPJGwXGKLW/IED76VzeO6S5pIQaPPD8N3qWnULs2zdwIAliP2BBPG1BOK62Ck8FhKVqB1vND5wpsFcIebEOmdVZuGbQFw9VBWTiXhjUjO0Sg/LaoTHQp6muY3G+HyDxwVe5Twqsb4Jz7ydpRzELT0iMnaJTH9XvJ4nVkRuCqyJsxuioewhBSDIl7guHNyrTjIsuEc9OJDG93GkQS7kapehq3QNmcvtkG0+Ru2U9tcxoZZZ1Mqc5TfA1JCUbZ3RvalvzFGz/hm/BNdhXUKz51MvA9e1vhhpp9/1AAHdSX5TRnWeF7hkR8FpqMyZuQXIfNsatqua+KXELTbQ0IbbPx4u0TOwTO0Xc97eik8LOZ/qQhc=
-    file: ~/twirec-x86_64-linux
+    file:
+        - "${RELEASE_FILE}"
     on:
       tags: true
   - provider: hackage
