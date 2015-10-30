@@ -38,7 +38,7 @@ makeModule m =
     , T.intercalate "\n" (map makeImport $ m_imports m)
     , ""
     , "import Json.Decode as " <> jsonDecQual
-    , "import Json.Decode (:=)"
+    , "import Json.Decode exposing ((:=))"
     , "import Json.Encode as " <> jsonEncQual
     , ""
     , T.intercalate "\n" (map makeTypeDef $ m_typeDefs m)
