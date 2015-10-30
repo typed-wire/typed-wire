@@ -15,12 +15,13 @@ WIP: Language idependent type-safe communication
 $ twirec --help
 Generate bindings using typed-wire for different languages
 
-Usage: twirec [-i|--include-dir DIR] [-e|--entrypoint MODULE-NAME]
+Usage: twirec [--version] [-i|--include-dir DIR] [-e|--entrypoint MODULE-NAME]
               [--hs-out DIR] [--elm-out DIR]
   Language idependent type-safe communication
 
 Available options:
   -h,--help                Show this help text
+  --version                show version and exit
   -i,--include-dir DIR     Directory to search for modules
   -e,--entrypoint MODULE-NAME
                            Entrypoint for compiler

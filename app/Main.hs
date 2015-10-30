@@ -1,22 +1,28 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell #-}
 module Main where
 
 import TW.Ast
-import TW.Loader
 import TW.Check
+import TW.Loader
 import TW.Parser
-import qualified TW.CodeGen.Haskell as HS
 import qualified TW.CodeGen.Elm as Elm
+import qualified TW.CodeGen.Haskell as HS
 
-import System.FilePath
+import qualified Paths_typed_wire as Meta
+
 import Control.Monad
+import Development.GitRev
 import Options.Applicative
+import System.FilePath
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
+import qualified Data.Version as Vers
 
 data Options
    = Options
-   { o_sourceDirs :: [FilePath]
+   { o_showVersion :: Bool
+   , o_sourceDirs :: [FilePath]
    , o_entryPoints :: [ModuleName]
    , o_hsOutDir :: Maybe FilePath
    , o_elmOutDir :: Maybe FilePath
@@ -25,7 +31,8 @@ data Options
 optParser :: Parser Options
 optParser =
     Options
-    <$> sourceDirsP
+    <$> switch (long "version" <> help "show version and exit")
+    <*> sourceDirsP
     <*> entryPointsP
     <*> hsOutP
     <*> elmOutP
@@ -66,8 +73,26 @@ main =
           <> header "Generate bindings using typed-wire for different languages"
           )
 
+showVersion :: IO ()
+showVersion =
+    T.putStrLn versionMessage
+    where
+      versionMessage =
+          T.unlines
+          [ "Version " <> T.pack (Vers.showVersion Meta.version)
+          , "Git: " <> $(gitBranch) <> "@" <> $(gitHash)
+          , " (" <> $(gitCommitCount) <> " commits in HEAD)"
+          , if $(gitDirty) then " (includes uncommited changes)" else ""
+          ]
+
 run :: Options -> IO ()
 run opts =
+    if o_showVersion opts
+    then showVersion
+    else run' opts
+
+run' :: Options -> IO ()
+run' opts =
     do allModules <- loadModules (o_sourceDirs opts) (o_entryPoints opts)
        case allModules of
          Left err -> fail err
