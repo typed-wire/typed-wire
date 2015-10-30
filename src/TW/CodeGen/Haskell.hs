@@ -144,7 +144,7 @@ makeEnumDef ed =
               (argParam, argVal) =
                   case ec_arg ec of
                     Nothing -> ("", "True")
-                    Just _ -> ("x", "x")
+                    Just _ -> ("y", "y")
           in constr <> " " <> argParam <> " -> " <> aeson "object"
              <> " [" <> T.pack (show tag) <> " " <> aeson ".=" <> " " <> argVal <> "]"
       fullType =
