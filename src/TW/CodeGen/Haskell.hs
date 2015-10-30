@@ -33,6 +33,7 @@ makeModule m =
     , ""
     , T.intercalate "\n" (map makeImport $ m_imports m)
     , ""
+    , "import Control.Applicative"
     , "import Control.Monad (join)"
     , "import qualified Data.Aeson as " <> aesonQual
     , "import qualified Data.Text as T"
