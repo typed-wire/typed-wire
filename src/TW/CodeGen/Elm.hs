@@ -188,6 +188,9 @@ jsonEncFor t =
           | bi == tyBool -> jsonEnc "bool"
           | bi == tyFloat -> jsonEnc "float"
           | bi == tyBytes -> "ELib.jencAsBase64"
+          | bi == tyDateTime -> "ELib.jencDateTime"
+          | bi == tyTime -> "ELib.jencTime"
+          | bi == tyDate -> "ELib.jencDate"
           | bi == tyList ->
               case tvars of
                 [arg] -> jsonEnc "list" <> " (" <> jsonEncFor arg <> ")"
@@ -216,6 +219,9 @@ jsonDecFor t =
           | bi == tyBool -> jsonDec "bool"
           | bi == tyFloat -> jsonDec "float"
           | bi == tyBytes -> "ELib.jdecAsBase64"
+          | bi == tyDateTime -> "ELib.jdecDateTime"
+          | bi == tyTime -> "ELib.jdecTime"
+          | bi == tyDate -> "ELib.jdecDate"
           | bi == tyList ->
               case tvars of
                 [arg] -> jsonDec "list" <> " (" <> jsonDecFor arg <> ")"
@@ -249,6 +255,9 @@ makeType t =
           | bi == tyInt -> "Int"
           | bi == tyBool -> "Bool"
           | bi == tyFloat -> "Float"
+          | bi == tyDateTime -> "ELib.DateTime"
+          | bi == tyTime -> "ELib.Time"
+          | bi == tyDate -> "ELib.Date"
           | bi == tyMaybe -> "(Maybe " <> T.intercalate " " (map makeType tvars) <> ")"
           | bi == tyList -> "(List " <> T.intercalate " " (map makeType tvars) <> ")"
           | bi == tyBytes -> "ELib.AsBase64"

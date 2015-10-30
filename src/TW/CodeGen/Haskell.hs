@@ -47,6 +47,7 @@ makeModule m =
     , "import qualified TW.Support.Lib as HLib"
     , "import Control.Applicative"
     , "import Control.Monad (join)"
+    , "import Data.Time"
     , "import qualified Data.Aeson as " <> aesonQual
     , "import qualified Data.Text as T"
     , "import qualified Data.Vector as V"
@@ -179,8 +180,11 @@ makeType t =
           | bi == tyMaybe -> "(Maybe " <> T.intercalate " " (map makeType tvars) <> ")"
           | bi == tyBytes -> "HLib.AsBase64"
           | bi == tyList -> "(V.Vector " <> T.intercalate " " (map makeType tvars) <> ")"
+          | bi == tyDateTime -> "UTCTime"
+          | bi == tyTime -> "TimeOfDay"
+          | bi == tyDate -> "Day"
           | otherwise ->
-              error $ "Elm: Unimplemented built in type: " ++ show t
+              error $ "Haskell: Unimplemented built in type: " ++ show t
 
 makeQualTypeName :: QualTypeName -> T.Text
 makeQualTypeName qtn =

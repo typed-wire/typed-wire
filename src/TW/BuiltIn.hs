@@ -2,7 +2,7 @@
 module TW.BuiltIn
     ( BuiltIn(..)
     , allBuiltIns, isBuiltIn
-    , tyString, tyInt, tyFloat, tyBool, tyMaybe, tyBytes, tyList
+    , tyString, tyInt, tyFloat, tyBool, tyMaybe, tyBytes, tyList, tyDateTime, tyDate, tyTime
     )
 where
 
@@ -18,7 +18,7 @@ data BuiltIn
    } deriving (Show, Eq)
 
 allBuiltIns :: [BuiltIn]
-allBuiltIns = [tyString, tyInt, tyFloat, tyBool, tyMaybe, tyBytes, tyList]
+allBuiltIns = [tyString, tyInt, tyFloat, tyBool, tyMaybe, tyBytes, tyList, tyDateTime, tyDate, tyTime]
 
 isBuiltIn :: Type -> Maybe (BuiltIn, [Type])
 isBuiltIn ty =
@@ -56,3 +56,15 @@ tyList = builtInVars "List" ["a"]
 
 tyBytes :: BuiltIn
 tyBytes = builtIn "Bytes"
+
+-- | DateTime type, format: YYYY-MM-DD HH:MM:SS[Z|+XX|-XX] or YYYY-MM-DDTHH:MM:SS[Z|+XX|-XX]
+tyDateTime :: BuiltIn
+tyDateTime = builtIn "DateTime"
+
+-- | Date type, format: YYYY-MM-DD
+tyDate :: BuiltIn
+tyDate = builtIn "Date"
+
+-- | Time type, format: HH:MM:SS
+tyTime :: BuiltIn
+tyTime = builtIn "Time"
