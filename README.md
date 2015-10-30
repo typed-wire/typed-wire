@@ -2,10 +2,11 @@ typed-wire
 =====
 
 [![Build Status](https://travis-ci.org/agrafix/typed-wire.svg)](https://travis-ci.org/agrafix/typed-wire)
-
+[![Hackage](https://img.shields.io/hackage/v/typed-wire.svg)](http://hackage.haskell.org/package/typed-wire)
 
 ## Intro
 
+Hackage: [typed-wire](http://hackage.haskell.org/package/typed-wire)
 
 WIP: Language idependent type-safe communication
 
@@ -21,7 +22,7 @@ Usage: twirec [--version] [-i|--include-dir DIR] [-e|--entrypoint MODULE-NAME]
 
 Available options:
   -h,--help                Show this help text
-  --version                show version and exit
+  --version                Show version and exit
   -i,--include-dir DIR     Directory to search for modules
   -e,--entrypoint MODULE-NAME
                            Entrypoint for compiler
@@ -32,6 +33,7 @@ Available options:
 
 ## Install
 
+* Using cabal: `cabal install typed-wire`
 * From Source (cabal): `git clone https://github.com/agrafix/typed-wire.git && cd typed-wire && cabal install`
 * From Source (stack): `git clone https://github.com/agrafix/typed-wire.git && cd typed-wire && stack build`
 
