@@ -17,11 +17,9 @@ script:
 - stack build --pedantic --no-terminal
 deploy:
   - provider: releases
-    username: agrafix
-    password:
-        secure: Ystf0J7oQ3VBJblXDNKUk5/wgKJjk7JGBNReHCT3PbF6VBVLT6B6fJFfC/O9zYm3/chzcGL092lLeJmNQpPI/F63MhYgtGQACvfl93MEGDgNeGdYkOMeDATc2QhtztmT79uFw1NOFhXssHidiCBHsWXvkmcHsFT6uKMeGqRtJojuVpuIXX9XstwybGIV+pv2ovZY5Q2wMErG19tzPVu9Vt9gdMKoGHPCSDeFL5wTnM+Zct6F1MQSu0VDOe2JTk7c6B7UfpUxTVZ1BDr/jTZN6bIs/McjifvT4k9fqKhZJEByUtRvO8zqHqoL9PxqnkjYp+7qOwpe7AqPG5j5+ZHSM7RM7zl85DbJYy0KgxpNfStpv8o4VxPmNx97SvYre+qo3JlzelyZPKOk7nwxsZpVNRg0uYlcGsc91UvGPkKdMyM2GqjEtoqeDR/1bBgTqMNXdXYWrImhs1PPEVLYs787DJAiskkmEYgAZIiACki8lVbbZSiyWa976SU85c8h7qTK2Cr3xtKbsZnoP9HYauMkYqNIyX7r9OHjNcqoBKJ1dswDMTzlJfs3p/PlgCpXjwNKGlqqweYv1pqqTBpX3L8WqetLLa2UwUgjn+f78CadfB/HqEZvmeRwWzsqhESAWoizTX1eJmurb6d64tHdV4fWev3Mt+7pnCzVCfnWbwxQxqg=
+    api_key:
+      secure: fTRzmC53IsYLJKX7jHFoo7wQEWagoDEihJ/3wSH40vzzLI7LgyrLR0eS9H92NVrk31v//IxRVNd5I6RE/8i1V4NO4VdxhjM2BP+painMemgCIxX6hhP+IF1q8+x4vtOFD4WvN+6UmJNI+K4o0WjfFjIaXpkxqJgmF7lrF9fzuOdTSj76ZsdO51WNrRFVDRAbf94eLoJbGkTeAFJiPUbI+LQ/AQcHrw7VFB/XkMmTc4bUJMMXmdkxk7RRU2Vma2t7sY/JNhcSajeHIYiMjHe0M9+x3cbPRwriOEmJUeccBg0+sA8UTTji3H+UEhAI1pIPJGwXGKLW/IED76VzeO6S5pIQaPPD8N3qWnULs2zdwIAliP2BBPG1BOK62Ck8FhKVqB1vND5wpsFcIebEOmdVZuGbQFw9VBWTiXhjUjO0Sg/LaoTHQp6muY3G+HyDxwVe5Twqsb4Jz7ydpRzELT0iMnaJTH9XvJ4nVkRuCqyJsxuioewhBSDIl7guHNyrTjIsuEc9OJDG93GkQS7kapehq3QNmcvtkG0+Ru2U9tcxoZZZ1Mqc5TfA1JCUbZ3RvalvzFGz/hm/BNdhXUKz51MvA9e1vhhpp9/1AAHdSX5TRnWeF7hkR8FpqMyZuQXIfNsatqua+KXELTbQ0IbbPx4u0TOwTO0Xc97eik8LOZ/qQhc=
     file: ~/.local/bin/twirec
-    skip_cleanup: true
     on:
       tags: true
   - provider: hackage
