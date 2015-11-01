@@ -48,6 +48,7 @@ makeModule m =
     , T.intercalate "\n" (map makeImport $ m_imports m)
     , ""
     , "import TW.Support.Lib as ELib"
+    , "import List as L"
     , "import Json.Decode as " <> jsonDecQual
     , "import Json.Decode exposing ((:=))"
     , "import Json.Encode as " <> jsonEncQual
@@ -193,7 +194,8 @@ jsonEncFor t =
           | bi == tyDate -> "ELib.jencDate"
           | bi == tyList ->
               case tvars of
-                [arg] -> jsonEnc "list" <> " (" <> jsonEncFor arg <> ")"
+                [arg] ->
+                    "(" <> jsonEnc "list" <> " << L.map (" <> jsonEncForArg arg <> "))"
                 _ -> error $ "Elm: odly shaped List value"
           | bi == tyMaybe ->
               case tvars of
