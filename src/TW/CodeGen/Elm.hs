@@ -195,7 +195,7 @@ jsonEncFor t =
           | bi == tyList ->
               case tvars of
                 [arg] ->
-                    "(" <> jsonEnc "list" <> " << L.map (" <> jsonEncForArg arg <> "))"
+                    "(" <> jsonEnc "list" <> " << L.map (" <> jsonEncFor arg <> "))"
                 _ -> error $ "Elm: odly shaped List value"
           | bi == tyMaybe ->
               case tvars of
