@@ -18,7 +18,7 @@ import qualified Data.Text.Encoding as T
 -- | Usual bytestrings, but with base64 aeson repr
 newtype AsBase64
     = AsBase64 { unBase64 :: BS.ByteString }
-      deriving (Show, Eq, Ord)
+      deriving (Show, Read, Eq, Ord)
 
 instance ToJSON AsBase64 where
     toJSON (AsBase64 bs) =

@@ -77,7 +77,7 @@ makeStructDef sd =
     [ "data " <> fullType
     , "   = " <> unTypeName (sd_name sd)
     , "   { " <> T.intercalate "\n   , " (map (makeStructField (makeFieldPrefix $ sd_name sd)) $ sd_fields sd)
-    , "   } deriving (Show, Eq, Ord)"
+    , "   } deriving (Show, Read, Eq, Ord)"
     , ""
     , "instance " <> aesonPreds (sd_args sd) (aeson "ToJSON") <> aeson "ToJSON" <> " (" <> fullType <> ") where"
     , "    toJSON (" <> unTypeName (sd_name sd) <> " " <> funArgs <> ") ="
@@ -120,7 +120,7 @@ makeEnumDef ed =
     T.unlines
     [ "data " <> fullType
     , "   = " <> T.intercalate "\n   | " (map makeEnumChoice $ ed_choices ed)
-    , "     deriving (Show, Eq, Ord)"
+    , "     deriving (Show, Read, Eq, Ord)"
     , ""
     , "instance " <> aesonPreds (ed_args ed) (aeson "ToJSON") <> aeson "ToJSON" <> " (" <> fullType <> ") where"
     , "    toJSON x ="
