@@ -9,6 +9,7 @@ import TW.Ast
 import TW.BuiltIn
 import TW.JsonRepr
 import TW.Types
+import TW.Utils
 
 import Data.Char
 import Data.Maybe
@@ -49,11 +50,36 @@ makeModule m =
     , "import qualified Data.Vector as V"
     , ""
     , T.intercalate "\n" (map makeTypeDef $ m_typeDefs m)
+    , T.intercalate "\n" (map makeApiDef $ m_apis m)
     ]
 
 makeImport :: ModuleName -> T.Text
 makeImport m =
     "import qualified " <> printModuleName m
+
+makeApiDef :: ApiDef -> T.Text
+makeApiDef ad = -- TODO: headers!
+    T.unlines
+    [ "data " <> handlerType <> " m"
+    , "   = " <> handlerType
+    , "   { " <> T.intercalate "\n   , " (map makeEndPoint $ ad_endpoints ad)
+    , "   }"
+    ]
+    where
+      handlerType = "ApiHandler" <> capitalizeText (unApiName $ ad_name ad)
+      prefix = makeFieldPrefix $ TypeName handlerType
+      makeEndPoint ep =
+        prefix <> unEndpointName (aed_name ep) <> " :: "
+        <> T.intercalate " -> " (map makeType pathTypes)
+        <> (if not (null pathTypes) then " -> " else "")
+        <> maybe "" (\x -> makeType x <> " -> ") (aed_req ep)
+        <> "m (" <> makeType (aed_resp ep) <> ")"
+        where
+          pathTypes =
+            flip mapMaybe (aed_route ep) $ \x ->
+            case x of
+              ApiRouteDynamic dyn -> Just dyn
+              _ -> Nothing
 
 makeTypeDef :: TypeDef -> T.Text
 makeTypeDef td =

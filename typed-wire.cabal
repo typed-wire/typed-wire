@@ -26,7 +26,8 @@ library
                   TW.JsonRepr,
                   TW.CodeGen.Elm,
                   TW.CodeGen.Haskell,
-                  TW.Types
+                  TW.Types,
+                  TW.Utils
   build-depends:
                 base >= 4.7 && < 5,
                 text >= 1.2,
