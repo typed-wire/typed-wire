@@ -35,6 +35,10 @@ newtype ApiName
     = ApiName { unApiName :: T.Text }
       deriving (Show, Eq, Ord)
 
+newtype EndpointName
+    = EndpointName { unEndpointName :: T.Text }
+      deriving (Show, Eq, Ord)
+
 data QualTypeName
    = QualTypeName
    { qtn_module :: ModuleName
@@ -52,13 +56,16 @@ data Module
 data ApiDef
    = ApiDef
    { ad_name :: ApiName
+   , ad_headers :: [ApiHeader]
    , ad_endpoints :: [ApiEndpointDef]
    } deriving (Show, Eq)
 
 data ApiEndpointDef
    = ApiEndpointDef
-   { aed_verb :: StdMethod
+   { aed_name :: EndpointName
+   , aed_verb :: StdMethod
    , aed_route :: [ApiRouteComp]
+   , aed_headers :: [ApiHeader]
    , aed_req :: Maybe Type
    , aed_resp :: Type
    } deriving (Show, Eq)
@@ -66,6 +73,17 @@ data ApiEndpointDef
 data ApiRouteComp
    = ApiRouteStatic T.Text
    | ApiRouteDynamic Type
+     deriving (Show, Eq)
+
+data ApiHeader
+   = ApiHeader
+   { ah_name :: T.Text
+   , ah_value :: ApiHeaderValue
+   } deriving (Show, Eq)
+
+data ApiHeaderValue
+   = ApiHeaderValueStatic T.Text
+   | ApiHeaderValueDynamic Type
      deriving (Show, Eq)
 
 data TypeDef

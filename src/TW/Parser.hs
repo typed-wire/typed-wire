@@ -9,6 +9,7 @@ where
 import TW.Ast
 
 import Data.Either
+import Data.Maybe
 import Control.Monad.Identity
 import Data.Char
 import Text.Parsec
@@ -63,28 +64,47 @@ parseApiDef :: Parser ApiDef
 parseApiDef =
     do reserved "api"
        name <- identifier
-       endpoints <- braces $ many parseApiEndpoint
-       return (ApiDef (ApiName $ T.pack name) endpoints)
+       (headers, endpoints) <-
+         braces $
+         do headers <-
+              optionMaybe $ try $ brackets (commaSep1 parseApiHeader) <* semi
+            ep <- many parseApiEndpoint
+            return (fromMaybe [] headers, ep)
+       return (ApiDef (ApiName $ T.pack name) headers endpoints)
 
 parseApiEndpoint :: Parser ApiEndpointDef
 parseApiEndpoint =
-    do verbStr <- identifier
+    do name <- identifier
+       reservedOp "="
+       verbStr <- identifier
        verb <-
          case parseMethod (T.encodeUtf8 $ T.toUpper $ T.pack verbStr) of
            Left _ -> fail $ "Unknown http verb: " ++ verbStr
            Right v -> return v
        route <- parens (slashSep1 parseRouteComp)
+       headers <- optionMaybe $ try $ brackets (commaSep1 parseApiHeader)
        reservedOp ":"
        req <- optionMaybe $ try (parseType <* reservedOp "->")
        resp <- parseType
        _ <- semi
        return
          ApiEndpointDef
-         { aed_verb = verb
+         { aed_name = EndpointName $ T.pack name
+         , aed_verb = verb
+         , aed_headers = fromMaybe [] headers
          , aed_route = route
          , aed_req = req
          , aed_resp = resp
          }
+
+parseApiHeader :: Parser ApiHeader
+parseApiHeader =
+    do name <- stringLiteral
+       reservedOp "="
+       val <-
+          ApiHeaderValueStatic <$> (T.pack <$> stringLiteral) <|>
+          ApiHeaderValueDynamic <$> parseType
+       return (ApiHeader (T.pack name) val)
 
 parseRouteComp :: Parser ApiRouteComp
 parseRouteComp =
@@ -175,7 +195,7 @@ languageDef =
     , P.opLetter = oneOf ":!#$%&*+./<=>?@\\^|-~"
     , P.reservedNames =
         [ "module", "type", "enum", "api", "import", "as" ]
-    , P.reservedOpNames = [":", "->", "/"]
+    , P.reservedOpNames = [":", "->", "/", "="]
     , P.caseSensitive = False
     }
 
@@ -190,6 +210,9 @@ parens = P.parens lexer
 
 braces :: Parser a -> Parser a
 braces = P.braces lexer
+
+brackets :: Parser a -> Parser a
+brackets = P.brackets lexer
 
 angles :: Parser a -> Parser a
 angles = P.angles lexer
