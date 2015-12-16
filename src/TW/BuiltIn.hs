@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module TW.BuiltIn
     ( BuiltIn(..)
-    , allBuiltIns, isBuiltIn
+    , allBuiltIns, isBuiltIn, builtInAsType, pathPieceTypes, isPathPiece
     , tyString, tyInt, tyFloat, tyBool, tyMaybe, tyBytes, tyList, tyDateTime, tyDate, tyTime
     )
 where
@@ -17,8 +17,17 @@ data BuiltIn
    , bi_args :: [TypeVar]
    } deriving (Show, Eq)
 
+builtInAsType :: BuiltIn -> Type
+builtInAsType (BuiltIn qt args) = TyCon qt (map TyVar args)
+
 allBuiltIns :: [BuiltIn]
 allBuiltIns = [tyString, tyInt, tyFloat, tyBool, tyMaybe, tyBytes, tyList, tyDateTime, tyDate, tyTime]
+
+pathPieceTypes :: [BuiltIn]
+pathPieceTypes = [tyString, tyInt, tyFloat, tyBool]
+
+isPathPiece :: Type -> Bool
+isPathPiece t = t `elem` map builtInAsType pathPieceTypes
 
 isBuiltIn :: Type -> Maybe (BuiltIn, [Type])
 isBuiltIn ty =

@@ -28,5 +28,5 @@ enum FooOrBar<t> {
 api fooApi {
     ["X-ApiKey" = String];
     getFoo = get("foo" / Int)["X-Super-Header" = String] : Foo;
-    setFoo = post("foo" / Int) : Foo -> Bool;
+    setFoo = post("foo" / String) : Foo -> Bool;
 }

@@ -43,9 +43,8 @@ checkModules modules =
        let isValidType args t =
                case t of
                  TyVar tv ->
-                     if tv `elem` args
-                     then return ()
-                     else throwError $ "Undefined type variable " ++ show tv ++ " in " ++ currentMStr
+                     unless (tv `elem` args) $
+                     throwError $ "Undefined type variable " ++ show tv ++ " in " ++ currentMStr
                  TyCon qt qtArgs ->
                      case M.lookup qt defTypes of
                        Nothing ->
@@ -55,16 +54,33 @@ checkModules modules =
                               when (length tvars /= length qtArgs) $
                                    throwError $
                                    "Type " ++ show qt ++ " got applied wrong number of arguments in " ++ currentMStr
+           checkHeader h =
+               case ah_value h of
+                 ApiHeaderValueDynamic t ->
+                   isValidType [] t
+                 _ -> return ()
+           checkRoute r =
+               case r of
+                 ApiRouteDynamic t ->
+                   unless (isPathPiece t) $
+                   throwError $
+                   "Invalid route parameter " ++ show t ++ ". Route parameters can only be primitive types!"
+                 _ -> return ()
        forM_ (m_typeDefs m) $ \td ->
            case td of
              TypeDefEnum ed ->
                  forM_ (ed_choices ed) $ \ch ->
-                 case ec_arg ch of
-                   Nothing -> return ()
-                   Just ty -> isValidType (ed_args ed) ty
+                 forM_ (ec_arg ch) (isValidType (ed_args ed))
              TypeDefStruct sd ->
                  forM_ (sd_fields sd) $ \fld ->
-                 do isValidType (sd_args sd) (sf_type fld)
+                 isValidType (sd_args sd) (sf_type fld)
+       forM_ (m_apis m) $ \api ->
+          do mapM_ checkHeader (ad_headers api)
+             forM_ (ad_endpoints api) $ \ep ->
+               do mapM_ checkHeader (aed_headers ep)
+                  mapM_ (isValidType []) (aed_req ep)
+                  isValidType [] (aed_resp ep)
+                  mapM_ checkRoute (aed_route ep)
        return m
     where
       getDefinedTypes m =
