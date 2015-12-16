@@ -34,7 +34,8 @@ library
                 containers >=0.5,
                 directory >=1.2,
                 filepath >=1.4,
-                file-embed >=0.0.9
+                file-embed >=0.0.9,
+                http-types >=0.8.6
   default-language:    Haskell2010
 
 executable twirec

@@ -8,10 +8,13 @@ where
 
 import TW.Ast
 
+import Data.Either
 import Control.Monad.Identity
 import Data.Char
 import Text.Parsec
+import Network.HTTP.Types.Method
 import qualified Data.Text as T
+import qualified Data.Text.Encoding as T
 import qualified Data.Text.IO as T
 import qualified Text.Parsec.Token as P
 
@@ -41,8 +44,8 @@ parseModule =
        moduleName <- parseModuleName
        _ <- semi
        imports <- many parseImport
-       tyDefs <- many parseTypeDef
-       return $ Module moduleName imports tyDefs
+       tyDefs <- many ((Left <$> parseTypeDef) <|> (Right <$> parseApiDef))
+       return $ Module moduleName imports (lefts tyDefs) (rights tyDefs)
 
 parseModuleName :: Parser ModuleName
 parseModuleName =
@@ -55,6 +58,38 @@ parseImport =
        m <- parseModuleName
        _ <- semi
        return m
+
+parseApiDef :: Parser ApiDef
+parseApiDef =
+    do reserved "api"
+       name <- identifier
+       endpoints <- braces $ many parseApiEndpoint
+       return (ApiDef (ApiName $ T.pack name) endpoints)
+
+parseApiEndpoint :: Parser ApiEndpointDef
+parseApiEndpoint =
+    do verbStr <- identifier
+       verb <-
+         case parseMethod (T.encodeUtf8 $ T.toUpper $ T.pack verbStr) of
+           Left _ -> fail $ "Unknown http verb: " ++ verbStr
+           Right v -> return v
+       route <- parens (slashSep1 parseRouteComp)
+       reservedOp ":"
+       req <- optionMaybe $ try (parseType <* reservedOp "->")
+       resp <- parseType
+       _ <- semi
+       return
+         ApiEndpointDef
+         { aed_verb = verb
+         , aed_route = route
+         , aed_req = req
+         , aed_resp = resp
+         }
+
+parseRouteComp :: Parser ApiRouteComp
+parseRouteComp =
+    ApiRouteStatic <$> (T.pack <$> stringLiteral) <|>
+    ApiRouteDynamic <$> parseType
 
 parseTypeDef :: Parser TypeDef
 parseTypeDef =
@@ -84,7 +119,7 @@ parseEnumChoice =
 
 parseStructField :: Parser StructField
 parseStructField =
-    do name <- (FieldName . T.pack <$> identifier)
+    do name <- FieldName . T.pack <$> identifier
        reservedOp ":"
        ty <- parseType
        _ <- semi
@@ -138,13 +173,17 @@ languageDef =
     , P.identLetter = alphaNum <|> oneOf "_"
     , P.opStart = oneOf ":!#$%&*+./<=>?@\\^|-~"
     , P.opLetter = oneOf ":!#$%&*+./<=>?@\\^|-~"
-    , P.reservedNames = ["module", "type", "enum", "import", "as"]
-    , P.reservedOpNames = [":", "->"]
+    , P.reservedNames =
+        [ "module", "type", "enum", "api", "import", "as" ]
+    , P.reservedOpNames = [":", "->", "/"]
     , P.caseSensitive = False
     }
 
 lexer :: P.GenTokenParser T.Text () Identity
 lexer = P.makeTokenParser languageDef
+
+stringLiteral :: Parser String
+stringLiteral = P.stringLiteral lexer
 
 parens :: Parser a -> Parser a
 parens = P.parens lexer
@@ -175,6 +214,9 @@ dot = P.dot lexer
 
 dotSep1 :: Parser a -> Parser [a]
 dotSep1 p = sepBy p dot
+
+slashSep1 :: Parser a -> Parser [a]
+slashSep1 p = sepBy p (reservedOp "/")
 
 commaSep1 :: Parser a -> Parser [a]
 commaSep1 = P.commaSep1 lexer

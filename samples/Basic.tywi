@@ -24,3 +24,8 @@ enum FooOrBar<t> {
     BarInt(Bar<Int>);
     BarGeneral(Bar<t>);
 }
+
+api fooApi {
+    get("foo" / Int) : Foo;
+    post("foo" / Int) : Foo -> Bool;
+}

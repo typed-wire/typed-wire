@@ -2,6 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module TW.Ast where
 
+import Network.HTTP.Types.Method
 import qualified Data.Text as T
 
 newtype ModuleName
@@ -30,6 +31,10 @@ newtype ChoiceName
     = ChoiceName { unChoiceName :: T.Text }
       deriving (Show, Eq, Ord)
 
+newtype ApiName
+    = ApiName { unApiName :: T.Text }
+      deriving (Show, Eq, Ord)
+
 data QualTypeName
    = QualTypeName
    { qtn_module :: ModuleName
@@ -41,7 +46,27 @@ data Module
    { m_name :: ModuleName
    , m_imports :: [ModuleName]
    , m_typeDefs :: [TypeDef]
+   , m_apis :: [ApiDef]
    } deriving (Show, Eq)
+
+data ApiDef
+   = ApiDef
+   { ad_name :: ApiName
+   , ad_endpoints :: [ApiEndpointDef]
+   } deriving (Show, Eq)
+
+data ApiEndpointDef
+   = ApiEndpointDef
+   { aed_verb :: StdMethod
+   , aed_route :: [ApiRouteComp]
+   , aed_req :: Maybe Type
+   , aed_resp :: Type
+   } deriving (Show, Eq)
+
+data ApiRouteComp
+   = ApiRouteStatic T.Text
+   | ApiRouteDynamic Type
+     deriving (Show, Eq)
 
 data TypeDef
    = TypeDefEnum EnumDef
