@@ -25,7 +25,8 @@ library
                   TW.BuiltIn,
                   TW.JsonRepr,
                   TW.CodeGen.Elm,
-                  TW.CodeGen.Haskell
+                  TW.CodeGen.Haskell,
+                  TW.Types
   build-depends:
                 base >= 4.7 && < 5,
                 text >= 1.2,
@@ -34,7 +35,6 @@ library
                 containers >=0.5,
                 directory >=1.2,
                 filepath >=1.4,
-                file-embed >=0.0.9,
                 http-types >=0.8.6
   default-language:    Haskell2010
 

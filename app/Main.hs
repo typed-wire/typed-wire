@@ -6,6 +6,7 @@ import TW.Ast
 import TW.Check
 import TW.Loader
 import TW.Parser
+import TW.Types
 import qualified TW.CodeGen.Elm as Elm
 import qualified TW.CodeGen.Haskell as HS
 
@@ -103,19 +104,16 @@ run' opts =
                Left err -> fail err
                Right readyModules ->
                    do _ <- T.forM (o_hsOutDir opts) $ \dir ->
-                          do storeLib dir HS.makeLibraryModule
+                          do T.putStrLn $
+                                  "Required Haskell library is "
+                                  <> li_name HS.libraryInfo <> "@" <> li_version HS.libraryInfo
                              mapM_ (runner dir HS.makeModule HS.makeFileName) readyModules
                       _ <- T.forM (o_elmOutDir opts) $ \dir ->
-                          do storeLib dir Elm.makeLibraryModule
+                          do T.putStrLn $
+                                  "Required Elm library is "
+                                  <> li_name Elm.libraryInfo <> " version " <> li_version Elm.libraryInfo
                              mapM_ (runner dir Elm.makeModule Elm.makeFileName) readyModules
                       return ()
-
-storeLib :: FilePath -> (FilePath, T.Text) -> IO ()
-storeLib baseDir (baseLoc, content) =
-    do let loc = baseDir </> baseLoc
-       createDirectoryIfMissing True (takeDirectory loc)
-       putStrLn $ "Writing library " <> loc <> " ..."
-       T.writeFile loc content
 
 runner :: FilePath -> (Module -> T.Text) -> (ModuleName -> FilePath) -> Module -> IO ()
 runner baseDir mkModule mkFilename m =

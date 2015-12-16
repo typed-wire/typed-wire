@@ -1,34 +1,30 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
 module TW.CodeGen.Haskell
     ( makeFileName, makeModule
-    , makeLibraryModule
+    , libraryInfo
     )
 where
 
 import TW.Ast
 import TW.BuiltIn
 import TW.JsonRepr
+import TW.Types
 
 import Data.Char
-import Data.FileEmbed
 import Data.Maybe
 import Data.Monoid
 import System.FilePath
 import qualified Data.List as L
 import qualified Data.Text as T
 
+libraryInfo :: LibraryInfo
+libraryInfo = LibraryInfo "typed-wire-utils" "0.1.0.0"
+
 aesonQual :: T.Text
 aesonQual = "Data_Aeson_Lib"
 
 aeson :: T.Text -> T.Text
 aeson x = aesonQual <> "." <> x
-
-makeLibraryModule :: (FilePath, T.Text)
-makeLibraryModule =
-    ( "TW/Support/Lib.hs"
-    , $(embedStringFile "support/haskell/Lib.hs")
-    )
 
 makeFileName :: ModuleName -> FilePath
 makeFileName (ModuleName parts) =
@@ -44,7 +40,7 @@ makeModule m =
     , ""
     , T.intercalate "\n" (map makeImport $ m_imports m)
     , ""
-    , "import qualified TW.Support.Lib as HLib"
+    , "import qualified Text.TypedWire as HLib"
     , "import Control.Applicative"
     , "import Control.Monad (join)"
     , "import Data.Time"

@@ -1,16 +1,15 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
 module TW.CodeGen.Elm
     ( makeFileName, makeModule
-    , makeLibraryModule
+    , libraryInfo
     )
 where
 
 import TW.Ast
 import TW.BuiltIn
 import TW.JsonRepr
+import TW.Types
 
-import Data.FileEmbed
 import Data.Maybe
 import Data.Monoid
 import System.FilePath
@@ -29,15 +28,12 @@ jsonDecQual = "JD"
 jsonDec :: T.Text -> T.Text
 jsonDec x = jsonDecQual <> "." <> x
 
-makeLibraryModule :: (FilePath, T.Text)
-makeLibraryModule =
-    ( "TW/Support/Lib.elm"
-    , $(embedStringFile "support/elm/Lib.elm")
-    )
-
 makeFileName :: ModuleName -> FilePath
 makeFileName (ModuleName parts) =
     (L.foldl' (</>) "" $ map T.unpack parts) ++ ".elm"
+
+libraryInfo :: LibraryInfo
+libraryInfo = LibraryInfo "elm-typed-wire-utils" "1.0.0"
 
 makeModule :: Module -> T.Text
 makeModule m =
@@ -47,7 +43,7 @@ makeModule m =
     , ""
     , T.intercalate "\n" (map makeImport $ m_imports m)
     , ""
-    , "import TW.Support.Lib as ELib"
+    , "import TypedWire as ELib"
     , "import List as L"
     , "import Json.Decode as " <> jsonDecQual
     , "import Json.Decode exposing ((:=))"
