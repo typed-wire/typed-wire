@@ -58,22 +58,48 @@ makeImport m =
     "import qualified " <> printModuleName m
 
 makeApiDef :: ApiDef -> T.Text
-makeApiDef ad = -- TODO: headers!
+makeApiDef ad =
     T.unlines
     [ "data " <> handlerType <> " m"
     , "   = " <> handlerType
     , "   { " <> T.intercalate "\n   , " (map makeEndPoint $ ad_endpoints ad)
     , "   }"
+    , fromMaybe "" $ makeHeaderDef apiHeaderType ahprefix (ad_headers ad)
+    , T.intercalate "\n" (mapMaybe (\ep -> makeHeaderDef (headerType ep) (hprefix ep) (aed_headers ep)) $ ad_endpoints ad)
     ]
     where
       handlerType = "ApiHandler" <> capitalizeText (unApiName $ ad_name ad)
+      apiHeaderType = handlerType <> "Headers"
+      headerType ep = handlerType <> capitalizeText (unEndpointName (aed_name ep)) <> "Headers"
+      hprefix ep = makeFieldPrefix $ TypeName (headerType ep)
+      ahprefix = makeFieldPrefix $ TypeName apiHeaderType
       prefix = makeFieldPrefix $ TypeName handlerType
+      makeHeaderDef tyName tyPrefix headerList =
+        case headerList of
+          [] -> Nothing
+          _ ->
+            Just $ T.unlines
+            [ "data " <> tyName
+            , "   = " <> tyName
+            , "   { " <> T.intercalate "\n   , " (mapMaybe makeHeaderField headerList)
+            , "   }"
+            ]
+        where
+          makeHeaderField h =
+            case ah_value h of
+              ApiHeaderValueStatic _ -> Nothing
+              ApiHeaderValueDynamic ty ->
+                Just $
+                tyPrefix <> makeSafePrefixedFieldName (ah_name h) <> " :: !"
+                <> makeType ty
       makeEndPoint ep =
         prefix <> unEndpointName (aed_name ep) <> " :: "
+        <> (if not (null $ ad_headers ad) then apiHeaderType <> " -> " else "")
+        <> (if not (null $ aed_headers ep) then headerType ep <> " -> " else "")
         <> T.intercalate " -> " (map makeType pathTypes)
         <> (if not (null pathTypes) then " -> " else "")
         <> maybe "" (\x -> makeType x <> " -> ") (aed_req ep)
-        <> "m (" <> makeType (aed_resp ep) <> ")"
+        <> "m " <> makeType (aed_resp ep) <> ""
         where
           pathTypes =
             flip mapMaybe (aed_route ep) $ \x ->

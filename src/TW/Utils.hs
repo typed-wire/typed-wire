@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 module TW.Utils where
 
 import Data.Char
@@ -9,3 +10,6 @@ capitalizeText =
     where
        go (x:xs) = toUpper x : xs
        go [] = []
+
+makeSafePrefixedFieldName :: T.Text -> T.Text
+makeSafePrefixedFieldName = T.filter isAlphaNum
