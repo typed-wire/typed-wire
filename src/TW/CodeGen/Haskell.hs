@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module TW.CodeGen.Haskell
     ( makeFileName, makeModule
     , libraryInfo
@@ -48,6 +49,7 @@ makeModule m =
     , "import qualified Data.Aeson as " <> aesonQual
     , "import qualified Data.Text as T"
     , "import qualified Data.Vector as V"
+    , if not (null (m_apis m)) then "import Web.Spock\nimport Control.Monad.Trans" else ""
     , ""
     , T.intercalate "\n" (map makeTypeDef $ m_typeDefs m)
     , T.intercalate "\n" (map makeApiDef $ m_apis m)
@@ -66,9 +68,13 @@ makeApiDef ad =
     , "   }"
     , fromMaybe "" $ makeHeaderDef apiHeaderType ahprefix (ad_headers ad)
     , T.intercalate "\n" (mapMaybe (\ep -> makeHeaderDef (headerType ep) (hprefix ep) (aed_headers ep)) $ ad_endpoints ad)
+    , "wire" <> apiCapitalized <> " :: MonadIO m => " <> handlerType <> " (ActionCtxT ctx m) -> SpockCtxT ctx m ()"
+    , "wire" <> apiCapitalized <> " handler ="
+    , "    do " <> T.intercalate "\n       " (map makeEndPointImpl $ ad_endpoints ad)
     ]
     where
-      handlerType = "ApiHandler" <> capitalizeText (unApiName $ ad_name ad)
+      apiCapitalized = capitalizeText (unApiName $ ad_name ad)
+      handlerType = "ApiHandler" <> apiCapitalized
       apiHeaderType = handlerType <> "Headers"
       headerType ep = handlerType <> capitalizeText (unEndpointName (aed_name ep)) <> "Headers"
       hprefix ep = makeFieldPrefix $ TypeName (headerType ep)
@@ -106,6 +112,54 @@ makeApiDef ad =
             case x of
               ApiRouteDynamic dyn -> Just dyn
               _ -> Nothing
+      makeHeaderLoader tyName headerList =
+        "do {"
+        <> T.intercalate "" (map makeGetter headerList)
+        <> T.intercalate "" (mapMaybe makeChecker headerList)
+        <> "return (" <> tyName <> " " <> T.intercalate " " (mapMaybe makeSetter headerList) <> ");"
+        <> "}"
+        where
+          varName h = "hp" <> makeSafePrefixedFieldName (ah_name h)
+          makeGetter h =
+            varName h <> " <- header " <> T.pack (show (ah_name h)) <> ";"
+          makeChecker h =
+            case ah_value h of
+              ApiHeaderValueStatic val ->
+                Just $ "when (" <> varName h <> " /= " <> T.pack (show val) <> ") jumpNext; "
+              _ -> Nothing
+          makeSetter h =
+            case ah_value h of
+              ApiHeaderValueDynamic _ -> Just (varName h)
+              _ -> Nothing
+      makeEndPointImpl ep =
+        "hookRoute " <> (T.pack $ show $ aed_verb ep)  <> " ("
+        <> T.intercalate " <//> " (map makePathComp  $ aed_route ep) <> ") $ "
+        <> (if not (null pathVars) then "\\" <> T.intercalate " " pathVars <> " -> " else "")
+        <> "do {"
+        <> (if not (null (ad_headers ad)) then "apiHeaders <- " <> makeHeaderLoader apiHeaderType (ad_headers ad) <> "; " else "")
+        <> (if not (null (aed_headers ep)) then "localHeaders <- " <> makeHeaderLoader (headerType ep) (aed_headers ep) <> "; " else "")
+        <> maybe "" (const "reqVal <- jsonBody';") (aed_req ep)
+        <> "out <- " <> prefix <> unEndpointName (aed_name ep) <> " handler "
+        <> (if not (null (ad_headers ad)) then "apiHeaders " else "")
+        <> (if not (null (aed_headers ep)) then "localHeaders " else "")
+        <> T.intercalate " " pathVars
+        <> " "
+        <> maybe "" (const "reqVal ") (aed_req ep)
+        <> ";"
+        <> "json out;"
+        <> "}"
+        where
+          pathVars =
+            map ((\(i :: Int) -> T.pack $ "pv" ++ show i) . snd) $
+            flip zip [0..] $
+            flip mapMaybe (aed_route ep) $ \x ->
+            case x of
+              ApiRouteDynamic _ -> Just ()
+              _ -> Nothing
+          makePathComp pc =
+            case pc of
+              ApiRouteStatic str -> T.pack (show str)
+              ApiRouteDynamic _ -> "var"
 
 makeTypeDef :: TypeDef -> T.Text
 makeTypeDef td =
