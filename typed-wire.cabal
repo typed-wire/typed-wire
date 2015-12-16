@@ -1,8 +1,8 @@
 name:                typed-wire
-version:             0.2.1.3
+version:             0.3.0.0
 synopsis:            WIP: Language idependent type-safe communication
 description:         Please see README.md
-homepage:            http://github.com/agrafix/typed-wire#readme
+homepage:            http://github.com/typed-wire/typed-wire#readme
 license:             MIT
 license-file:        LICENSE
 author:              Alexander Thiemann <mail@athiemann.net>
@@ -54,4 +54,4 @@ executable twirec
 
 source-repository head
   type:     git
-  location: https://github.com/agrafix/typed-wire
+  location: https://github.com/typed-wire/typed-wire

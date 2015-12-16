@@ -1,12 +1,13 @@
 typed-wire
 =====
 
-[![Build Status](https://travis-ci.org/agrafix/typed-wire.svg)](https://travis-ci.org/agrafix/typed-wire)
+[![Build Status](https://travis-ci.org/typed-wire/typed-wire.svg)](https://travis-ci.org/typed-wire/typed-wire)
 [![Hackage](https://img.shields.io/hackage/v/typed-wire.svg)](http://hackage.haskell.org/package/typed-wire)
 
 ## Intro
 
 Hackage: [typed-wire](http://hackage.haskell.org/package/typed-wire)
+Stackage: [typed-wire](https://www.stackage.org/package/typed-wire)
 
 WIP: Language idependent type-safe communication
 
@@ -34,8 +35,9 @@ Available options:
 ## Install
 
 * Using cabal: `cabal install typed-wire`
-* From Source (cabal): `git clone https://github.com/agrafix/typed-wire.git && cd typed-wire && cabal install`
-* From Source (stack): `git clone https://github.com/agrafix/typed-wire.git && cd typed-wire && stack build`
+* Using Stack: `stack install typed-wire`
+* From Source (cabal): `git clone https://github.com/typed-wire/typed-wire.git && cd typed-wire && cabal install`
+* From Source (stack): `git clone https://github.com/typed-wire/typed-wire.git && cd typed-wire && stack build`
 
 
 ## Misc
