@@ -121,7 +121,7 @@ makeApiDef ad =
         where
           varName h = "hp" <> makeSafePrefixedFieldName (ah_name h)
           makeGetter h =
-            varName h <> " <- header " <> T.pack (show (ah_name h)) <> ";"
+            varName h <> " <- header " <> T.pack (show (ah_name h)) <> " >>= maybe jumpNext return;"
           makeChecker h =
             case ah_value h of
               ApiHeaderValueStatic val ->

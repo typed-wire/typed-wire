@@ -20,7 +20,7 @@ enum Psy {
 }
 
 enum FooOrBar<t> {
-    Foo(Foo);
+    BarFoo(Foo);
     BarInt(Bar<Int>);
     BarGeneral(Bar<t>);
 }
