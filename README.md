@@ -18,7 +18,7 @@ $ twirec --help
 Generate bindings using typed-wire for different languages
 
 Usage: twirec [--version] [-i|--include-dir DIR] [-e|--entrypoint MODULE-NAME]
-              [--hs-out DIR] [--elm-out DIR]
+              [--hs-out DIR] [--elm-out DIR] [--purescript-out DIR]
   Language idependent type-safe communication
 
 Available options:
@@ -29,6 +29,7 @@ Available options:
                            Entrypoint for compiler
   --hs-out DIR             Generate Haskell bindings to specified dir
   --elm-out DIR            Generate Elm bindings to specified dir
+  --purescript-out DIR     Generate PureScript bindings to specified dir
 
 ```
 
