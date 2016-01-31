@@ -1,7 +1,10 @@
 language: node_js
 node_js:
-  - "4.0"
+- '4.0'
 sudo: false
+env:
+  global:
+    secure: fM427PrRVCgKflSjbVSfRmBdCeSJ9ATZl7eS9rNb9BIKtIj3V9qLXhOtXTGVdsUEyJBeynH9Q3YtbokKWPW4mOncsk6+fwHZrhP/cH5WcUvqgrPtQVV/14U1ykmTAMPGXI8Roy82zb1Bcn1u6I7ltrVJ39QV8XRVyRHibvkyIzy8p7F0Qy1Ca62ov0HjSZhwqKDxYAKJJgm7KO33l1DxSRTu8AV8gtBF1g9cjW7Nr5v1LQIL40DqdD3pAvGRnD2QBS6N76pP/qQEnIjfU6CTSnYSI8IGBzrNU1NisFCXpbdDTwJ+T+JOV2z4rinHCA0P410WfjoHV/VvRYt0EIYxOjgEJhX/G3rqmcmMQ2o9wfXryu28vIryqc7SCAFYGh4RxlcsHS1x7gB7k+Gc+/8thc8WmNfNx2cVgui3MtJreWAjY0K84qFelbbocdWA83mBWnpfyZf9R59jyX6eV4lPBrolE+VSc494stJKiBYi1NuZ8Om7L44cfzN8FQAY2L09ONL33Wsi/yw8fOtqDAfvcPNWn6CDuyE1Maww/KZ831di38dezH4uvLcN/h8/IPvmka10RlT5LqD2Kfn4XoIaVy9jBVFsURrxthSO2RYZUqeSVy8SWgg8N2Qq64pG4S3SoMt6AgtODEFRc/9WpPNvXNxOneMzWMmXqwuAh19sxXs=
 cache:
   directories:
   - $HOME/.stack/
@@ -9,11 +12,12 @@ cache:
 addons:
   apt:
     packages:
-      - libgmp-dev
+    - libgmp-dev
 before_install:
 - mkdir -p ~/.local/bin
 - export PATH=$HOME/.local/bin:$PATH
-- travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
+- travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards
+  --strip-components=1 -C ~/.local/bin '*/stack'
 - stack --no-terminal setup
 install:
 - npm install -g pulp purescript bower
@@ -21,19 +25,16 @@ install:
 script:
 - stack test --pedantic --no-terminal
 before_deploy:
-  - export RELEASE_FILE=$(stack exec -- which twirec)
-  - echo "Binary $RELEASE_FILE will be deployed to GitHub"
+- export RELEASE_FILE=$(stack exec -- which twirec)
+- echo "Binary $RELEASE_FILE will be deployed to GitHub"
 deploy:
-  - provider: releases
-    api_key:
-      secure: fTRzmC53IsYLJKX7jHFoo7wQEWagoDEihJ/3wSH40vzzLI7LgyrLR0eS9H92NVrk31v//IxRVNd5I6RE/8i1V4NO4VdxhjM2BP+painMemgCIxX6hhP+IF1q8+x4vtOFD4WvN+6UmJNI+K4o0WjfFjIaXpkxqJgmF7lrF9fzuOdTSj76ZsdO51WNrRFVDRAbf94eLoJbGkTeAFJiPUbI+LQ/AQcHrw7VFB/XkMmTc4bUJMMXmdkxk7RRU2Vma2t7sY/JNhcSajeHIYiMjHe0M9+x3cbPRwriOEmJUeccBg0+sA8UTTji3H+UEhAI1pIPJGwXGKLW/IED76VzeO6S5pIQaPPD8N3qWnULs2zdwIAliP2BBPG1BOK62Ck8FhKVqB1vND5wpsFcIebEOmdVZuGbQFw9VBWTiXhjUjO0Sg/LaoTHQp6muY3G+HyDxwVe5Twqsb4Jz7ydpRzELT0iMnaJTH9XvJ4nVkRuCqyJsxuioewhBSDIl7guHNyrTjIsuEc9OJDG93GkQS7kapehq3QNmcvtkG0+Ru2U9tcxoZZZ1Mqc5TfA1JCUbZ3RvalvzFGz/hm/BNdhXUKz51MvA9e1vhhpp9/1AAHdSX5TRnWeF7hkR8FpqMyZuQXIfNsatqua+KXELTbQ0IbbPx4u0TOwTO0Xc97eik8LOZ/qQhc=
-    file: "${RELEASE_FILE}"
-    on:
-      tags: true
-  - provider: hackage
-    username: AlexanderThiemann
-    skip_cleanup: true
-    on:
-      tags: true
-    password:
-      secure: R7G+GG5pKJaohCEumXsGwcVkpVeqHKXM8pgvNeeEcF+6iHHtVu8gyVV9Ow/F3UFY6hOqSaMMi550OKQrlsw5N4OhGco3cA5mg+5EKdzPAtivwQwQZZkpXktgyxalZgq1Ce1VLqNi2rL5XTVKd8cWz2f3FlYbsxZdiHEdFZ0R95LizwhaIWpB+ndyK1+aqGfWHWXmA80pQKq2TzY3mlkHzEIMGwD2zZ2u2+FKEX9HwAzTAun0qaKJ6BQg5G0WnkPrb8OaFGtVVA2Mw6JijDRmvL/9b9C4kIN8fg85SqHrbcaxmbPq6rzCjwF3S4l95k51uQg0UuTa5ywMzl0gzZFUjexo6vxrpgAPSQxKdwIUeshdIvyTUvVDTcE73a7Sj2kzI1o9oYoFspLobeVKE7U00jOB/sjdFO3LSSnbQpsp5Ht4Kzs0a3U785A4l9YJJMhYnusHhstzHYEj6sL3fSs2EMh6+ImdhhZ4msJUiL0sZ7wCQaGpcJILClMSkgNhpav8zYa6xx09rueRxSf7BE2ZAyWqLYcXLWeRmzWjvzTl8X1fU1ysDV6395hroVcvzQfC6wt+ftCkVasyfvLEpPG0ML/no5DTjNlHTR6X6NvrxXkQ8EiRoHsXMdahsAcCb9CwHc6RIh1JTKaAJw6Fw1XnYs9WAmvDDSH72HWZ6diwdOM=
+- provider: releases
+  api_key:
+    secure: fTRzmC53IsYLJKX7jHFoo7wQEWagoDEihJ/3wSH40vzzLI7LgyrLR0eS9H92NVrk31v//IxRVNd5I6RE/8i1V4NO4VdxhjM2BP+painMemgCIxX6hhP+IF1q8+x4vtOFD4WvN+6UmJNI+K4o0WjfFjIaXpkxqJgmF7lrF9fzuOdTSj76ZsdO51WNrRFVDRAbf94eLoJbGkTeAFJiPUbI+LQ/AQcHrw7VFB/XkMmTc4bUJMMXmdkxk7RRU2Vma2t7sY/JNhcSajeHIYiMjHe0M9+x3cbPRwriOEmJUeccBg0+sA8UTTji3H+UEhAI1pIPJGwXGKLW/IED76VzeO6S5pIQaPPD8N3qWnULs2zdwIAliP2BBPG1BOK62Ck8FhKVqB1vND5wpsFcIebEOmdVZuGbQFw9VBWTiXhjUjO0Sg/LaoTHQp6muY3G+HyDxwVe5Twqsb4Jz7ydpRzELT0iMnaJTH9XvJ4nVkRuCqyJsxuioewhBSDIl7guHNyrTjIsuEc9OJDG93GkQS7kapehq3QNmcvtkG0+Ru2U9tcxoZZZ1Mqc5TfA1JCUbZ3RvalvzFGz/hm/BNdhXUKz51MvA9e1vhhpp9/1AAHdSX5TRnWeF7hkR8FpqMyZuQXIfNsatqua+KXELTbQ0IbbPx4u0TOwTO0Xc97eik8LOZ/qQhc=
+  file: ${RELEASE_FILE}
+  on:
+    tags: true
+- provider: script
+  script: scripts/deploy-hackage.sh
+  on:
+    tags: true
