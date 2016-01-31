@@ -1,13 +1,10 @@
-language: haskell
+language: node_js
+node_js:
+  - "4.0"
 sudo: false
 cache:
   directories:
   - $HOME/.stack/
-addons:
-  apt:
-    packages:
-      - node-4.0
-      - npm
 before_install:
 - mkdir -p ~/.local/bin
 - export PATH=$HOME/.local/bin:$PATH
