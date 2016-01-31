@@ -59,27 +59,11 @@ decoderName ty = "dec" <> unTypeName ty
 encoderName :: TypeName -> T.Text
 encoderName ty = "enc" <> unTypeName ty
 
-genericName :: TypeName -> T.Text
-genericName ty = "gen" <> unTypeName ty
-
 eqName :: TypeName -> T.Text
 eqName ty = "eq" <> unTypeName ty
 
 showName :: TypeName -> T.Text
 showName ty = "show" <> unTypeName ty
-
-makeDefaultInstances :: TypeName -> [TypeVar] -> T.Text
-makeDefaultInstances typeName typeVars =
-  T.unlines
-  [ "derive instance " <> genericName typeName <> " :: "
-    <> tcPreds typeVars ["Generic"] <> "Generic (" <> fullType <> ")"
-  , "instance " <> eqName typeName <> " :: "
-    <> tcPreds typeVars ["Generic", "Eq"] <> "Eq (" <> fullType <> ") where eq = gEq"
-  , "instance " <> showName typeName <> " :: "
-    <> tcPreds typeVars ["Generic", "Show"] <> "Show (" <> fullType <> ") where show = gShow"
-  ]
-  where
-    fullType = unTypeName typeName <> " " <> T.intercalate " " (map unTypeVar typeVars)
 
 makeStructDef :: StructDef -> T.Text
 makeStructDef sd =
@@ -89,7 +73,15 @@ makeStructDef sd =
     , "   { " <> T.intercalate "\n   , " (map makeStructField $ sd_fields sd)
     , "   }"
     , ""
-    , makeDefaultInstances (sd_name sd) (sd_args sd)
+    , "instance " <> eqName (sd_name sd) <> " :: "
+      <> tcPreds (sd_args sd) ["Eq"] <> "Eq (" <> fullType <> ") where "
+      <> "eq (" <> justType <> " a) (" <> justType <> " b) = "
+      <> T.intercalate " && " (map makeFieldEq (sd_fields sd))
+    , "instance " <> showName (sd_name sd) <> " :: "
+      <> tcPreds (sd_args sd) ["Show"] <> "Show (" <> fullType <> ") where "
+      <> "show (" <> justType <> " a) = " <> T.pack (show justType) <> " ++ \"{\" ++ "
+      <> T.intercalate " ++ " (map makeFieldShow (sd_fields sd))
+      <> " ++ \"}\""
     , "instance " <> encoderName (sd_name sd) <> " :: "
       <> tcPreds (sd_args sd) ["EncodeJson"] <> "EncodeJson" <> " (" <> fullType <> ") where"
     , "    encodeJson (" <> unTypeName (sd_name sd) <> " objT) ="
@@ -103,6 +95,12 @@ makeStructDef sd =
     , "        pure $ " <> unTypeName (sd_name sd) <> " { " <> T.intercalate ", " (map makeFieldSetter $ sd_fields sd) <> " }"
     ]
     where
+      makeFieldShow fld =
+          let name = unFieldName $ sf_name fld
+          in  T.pack (show name) <> " ++ \": \" ++ show a." <> name
+      makeFieldEq fld =
+          let name = unFieldName $ sf_name fld
+          in  "a." <> name <> " == " <> "b." <> name
       makeFieldSetter fld =
           let name = unFieldName $ sf_name fld
           in name <> " : " <> "v" <> name
@@ -116,6 +114,7 @@ makeStructDef sd =
       makeToJsonFld fld =
           let name = unFieldName $ sf_name fld
           in T.pack (show name) <> " " <> ":=" <> " objT." <> name
+      justType = unTypeName (sd_name sd)
       fullType =
           unTypeName (sd_name sd) <> " " <> T.intercalate " " (map unTypeVar $ sd_args sd)
 
@@ -137,7 +136,13 @@ makeEnumDef ed =
     [ "data " <> fullType
     , "   = " <> T.intercalate "\n   | " (map makeEnumChoice $ ed_choices ed)
     , ""
-    , makeDefaultInstances (ed_name ed) (ed_args ed)
+    , "instance " <> eqName (ed_name ed) <> " :: "
+      <> tcPreds (ed_args ed) ["Eq"] <> "Eq (" <> fullType <> ") where "
+    , "    " <> T.intercalate "\n    " (map makeChoiceEq $ ed_choices ed)
+    , "    eq _ _ = false"
+    , "instance " <> showName (ed_name ed) <> " :: "
+      <> tcPreds (ed_args ed) ["Show"] <> "Show (" <> fullType <> ") where "
+    , "    " <> T.intercalate "\n    " (map makeChoiceShow $ ed_choices ed)
     , "instance " <> encoderName (ed_name ed) <> " :: "
       <> tcPreds (ed_args ed) ["EncodeJson"] <> "EncodeJson" <> " (" <> fullType <> ") where"
     , "    encodeJson x ="
@@ -150,6 +155,16 @@ makeEnumDef ed =
     , "        " <> T.intercalate "\n        <|> " (map mkFromJsonChoice $ ed_choices ed)
     ]
     where
+      makeChoiceShow ec =
+          let constr = unChoiceName $ ec_name ec
+          in case ec_arg ec of
+                 Nothing -> "show (" <> constr <> ") = " <> T.pack (show constr)
+                 Just _ -> "show (" <> constr <> " a) = " <> T.pack (show constr) <> " ++ show a"
+      makeChoiceEq ec =
+          let constr = unChoiceName $ ec_name ec
+          in case ec_arg ec of
+                 Nothing -> "eq (" <> constr <> ") (" <> constr <> ") = true"
+                 Just _ -> "eq (" <> constr <> " a) (" <> constr <> " b) = a == b"
       mkFromJsonChoice ec =
           let constr = unChoiceName $ ec_name ec
               tag = camelTo2 '_' $ T.unpack constr
