@@ -2,6 +2,7 @@
 module Main where
 
 import {-@ HTF_TESTS @-} TW.CodeGen.HaskellTest
+import {-@ HTF_TESTS @-} TW.CodeGen.PureScriptTest
 
 import Test.Framework
 

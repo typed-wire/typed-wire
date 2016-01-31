@@ -1,8 +1,13 @@
-language: haskell
+language: c
 sudo: false
 cache:
   directories:
   - $HOME/.stack/
+addons:
+  apt:
+    packages:
+      - node
+      - npm
 before_install:
 - mkdir -p ~/.local/bin
 - export PATH=$HOME/.local/bin:$PATH
@@ -10,6 +15,7 @@ before_install:
   | gunzip > ~/.local/bin/stack
 - chmod a+x ~/.local/bin/stack
 - stack --no-terminal setup
+- npm install -g pulp purescript
 install:
 - stack setup --no-terminal
 - stack build --only-snapshot --no-terminal

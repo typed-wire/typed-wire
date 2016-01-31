@@ -9,6 +9,7 @@ import TW.Parser
 import TW.Types
 import qualified TW.CodeGen.Elm as Elm
 import qualified TW.CodeGen.Haskell as HS
+import qualified TW.CodeGen.PureScript as PS
 
 import qualified Paths_typed_wire as Meta
 
@@ -28,6 +29,7 @@ data Options
    , o_entryPoints :: [ModuleName]
    , o_hsOutDir :: Maybe FilePath
    , o_elmOutDir :: Maybe FilePath
+   , o_psOutDir :: Maybe FilePath
    }
 
 optParser :: Parser Options
@@ -38,6 +40,7 @@ optParser =
     <*> entryPointsP
     <*> hsOutP
     <*> elmOutP
+    <*> psOutP
 
 sourceDirsP :: Parser [FilePath]
 sourceDirsP =
@@ -63,6 +66,11 @@ elmOutP :: Parser (Maybe FilePath)
 elmOutP =
     optional $ strOption $
     long "elm-out" <> metavar "DIR" <> help "Generate Elm bindings to specified dir"
+
+psOutP :: Parser (Maybe FilePath)
+psOutP =
+    optional $ strOption $
+    long "purescript-out" <> metavar "DIR" <> help "Generate PureScript bindings to specified dir"
 
 main :: IO ()
 main =
@@ -113,6 +121,11 @@ run' opts =
                                   "Required Elm library is "
                                   <> li_name Elm.libraryInfo <> " version " <> li_version Elm.libraryInfo
                              mapM_ (runner dir Elm.makeModule Elm.makeFileName) readyModules
+                      _ <- T.forM (o_psOutDir opts) $ \dir ->
+                          do T.putStrLn $
+                                  "Required PureScript library is "
+                                  <> li_name PS.libraryInfo <> " version " <> li_version PS.libraryInfo
+                             mapM_ (runner dir PS.makeModule PS.makeFileName) readyModules
                       return ()
 
 runner :: FilePath -> (Module -> T.Text) -> (ModuleName -> FilePath) -> Module -> IO ()
