@@ -6,15 +6,11 @@ module TW.CodeGen.PureScript
     )
 where
 
-{-
-TODO:
-- support api defs
--}
-
 import TW.Ast
 import TW.BuiltIn
 import TW.JsonRepr
 import TW.Types
+import TW.Utils
 
 import Data.Maybe
 import Data.Monoid
@@ -23,7 +19,7 @@ import qualified Data.List as L
 import qualified Data.Text as T
 
 libraryInfo :: LibraryInfo
-libraryInfo = LibraryInfo "purescript-typed-wire" "3710937a424ce442feecd5f339af223744c55292"
+libraryInfo = LibraryInfo "purescript-typed-wire" "0.2.0"
 
 makeFileName :: ModuleName -> FilePath
 makeFileName (ModuleName parts) =
@@ -37,9 +33,86 @@ makeModule m =
     , T.intercalate "\n" (map makeImport $ m_imports m)
     , ""
     , "import Data.TypedWire.Prelude"
+    , if not (null (m_apis m)) then "import Data.TypedWire.Api" else ""
     , ""
     , T.intercalate "\n" (map makeTypeDef $ m_typeDefs m)
+    , T.intercalate "\n" (map makeApiDef $ m_apis m)
     ]
+
+makeApiDef :: ApiDef -> T.Text
+makeApiDef ad =
+    T.unlines $
+    catMaybes
+    [ apiHeader
+    , Just $ T.intercalate "\n" (map makeEndPoint (ad_endpoints ad))
+    ]
+    where
+      apiHeader =
+        case not (null (ad_headers ad)) of
+          True -> Just $ makeHeaderType apiHeaderType (ad_headers ad)
+          False -> Nothing
+      apiCapitalized = capitalizeText (unApiName $ ad_name ad)
+      handlerType = "ApiHandler" <> apiCapitalized
+      apiHeaderType = handlerType <> "Headers"
+      headerType ep = handlerType <> capitalizeText (unEndpointName (aed_name ep)) <> "Headers"
+      makeHeaderName hdr = uncapitalizeText $ makeSafePrefixedFieldName (ah_name hdr)
+      makeHeaderType ty headers =
+        T.unlines
+        [ "type " <> ty <> " = "
+        , "    { " <> T.intercalate "\n    , " (map makeHeaderField headers)
+        , "    }"
+        ]
+      makeHeaderField hdr =
+        makeHeaderName hdr <> " :: String"
+      makeEndPoint ep =
+        T.unlines $
+        catMaybes
+        [ epHeader
+        , Just $ funName <> " :: forall m. (Monad m) => "
+          <> (maybe "" (const $ apiHeaderType <> " -> ") apiHeader)
+          <> (maybe "" (const $ headerType ep <> " -> ") epHeader)
+          <> urlParamSig
+          <> (maybe "" (\t -> makeType t <> " -> ") $ aed_req ep)
+          <> "ApiCall m " <> (maybe "Unit" makeType $ aed_req ep) <> " " <> makeType (aed_resp ep)
+        , Just $ funName
+          <> " "
+          <> (maybe "" (const "apiHeaders ") apiHeader)
+          <> (maybe "" (const "endpointHeaders ") epHeader)
+          <> urlParams
+          <> (maybe "" (const "reqBody ") $ aed_req ep)
+          <> "runRequest = do"
+        , Just $ "    let coreHeaders = [" <> T.intercalate ", " (map (headerPacker "apiHeaders") $ ad_headers ad) <> "]"
+        , Just $ "    let fullHeaders = coreHeaders ++ [" <> T.intercalate ", " (map (headerPacker "endpointHeaders") $ aed_headers ep) <> "]"
+        , Just $ "    let url = " <> T.intercalate " ++ \"/\" ++ " (map urlPacker routeInfo)
+        , Just $ "    let method = " <> T.pack (show $ aed_verb ep)
+        , Just $ "    let body = " <> (maybe "Nothing" (const "Just $ encodeJson reqBody") $ aed_req ep)
+        , Just $ "    let req = { headers: fullHeaders, method: method, body: body, url: url }"
+        , Just $ "    resp <- runRequest req"
+        , Just $ "    return $ if (resp.statusCode /= 200) then Left \"Return code was not 200\" else decodeJson resp.body"
+        ]
+        where
+          urlPacker (r, p) =
+            case r of
+              ApiRouteStatic t -> T.pack (show t)
+              ApiRouteDynamic _ -> "toPathPiece p" <> T.pack (show p) <> ""
+          headerPacker apiVar hdr =
+             "{ key: " <> T.pack (show $ ah_name hdr) <> ", value: " <> apiVar <> "." <> makeHeaderName hdr <> " }"
+          funName = unApiName (ad_name ad) <> capitalizeText (unEndpointName $ aed_name ep)
+          routeInfo = zip (aed_route ep) ([0..] :: [Int])
+          urlParams =
+            T.concat $ flip mapMaybe routeInfo $ \(r,p) ->
+            case r of
+              ApiRouteStatic _ -> Nothing
+              ApiRouteDynamic _ -> Just $ "p" <> T.pack (show p) <> " "
+          urlParamSig =
+            T.concat $ flip mapMaybe (aed_route ep) $ \r ->
+            case r of
+              ApiRouteStatic _ -> Nothing
+              ApiRouteDynamic ty -> Just (makeType ty <> " -> ")
+          epHeader =
+            case not (null (aed_headers ep)) of
+              True -> Just $ makeHeaderType (headerType ep) (aed_headers ep)
+              False -> Nothing
 
 makeImport :: ModuleName -> T.Text
 makeImport m =

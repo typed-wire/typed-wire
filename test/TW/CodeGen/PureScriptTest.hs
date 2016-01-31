@@ -65,8 +65,7 @@ bowerTemplate =
 test_pureScriptCodeGen :: IO ()
 test_pureScriptCodeGen =
   withSystemTempDirectory "purescriptCodeGenX" $ \dir ->
-  do putStrLn dir
-     let srcDir = dir </> "src"
+  do let srcDir = dir </> "src"
      loaded <- loadModules ["samples"] [ModuleName ["Basic"]]
      allModules <- assertRight loaded
      checkedModules <- assertRight $ checkModules allModules
