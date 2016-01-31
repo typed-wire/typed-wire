@@ -1,13 +1,13 @@
 name:                typed-wire
 version:             0.3.0.0
-synopsis:            WIP: Language idependent type-safe communication
+synopsis:            Language idependent type-safe communication
 description:         Please see README.md
 homepage:            http://github.com/typed-wire/typed-wire#readme
 license:             MIT
 license-file:        LICENSE
 author:              Alexander Thiemann <mail@athiemann.net>
 maintainer:          Alexander Thiemann <mail@athiemann.net>
-copyright:           (c) 2015 Alexander Thiemann <mail@athiemann.net>
+copyright:           (c) 2015 - 2016 Alexander Thiemann <mail@athiemann.net>
 category:            Web
 build-type:          Simple
 extra-source-files:

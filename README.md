@@ -9,7 +9,7 @@ typed-wire
 Hackage: [typed-wire](http://hackage.haskell.org/package/typed-wire)
 Stackage: [typed-wire](https://www.stackage.org/package/typed-wire)
 
-WIP: Language idependent type-safe communication
+Language idependent type-safe communication
 
 ## Cli Usage: twirec
 
@@ -50,4 +50,4 @@ Available options:
 ### License
 
 Released under the MIT license.
-(c) 2015 Alexander Thiemann <mail@athiemann.net>
+(c) 2015 - 2016 Alexander Thiemann <mail@athiemann.net>
