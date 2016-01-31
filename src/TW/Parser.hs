@@ -100,10 +100,9 @@ parseApiEndpoint =
 parseApiHeader :: Parser ApiHeader
 parseApiHeader =
     do name <- stringLiteral
-       reservedOp "="
        val <-
-          ApiHeaderValueStatic <$> (T.pack <$> stringLiteral) <|>
-          ApiHeaderValueDynamic <$> parseType
+          (reservedOp "=" *> (ApiHeaderValueStatic <$> (T.pack <$> stringLiteral))) <|>
+          pure ApiHeaderValueDynamic
        return (ApiHeader (T.pack name) val)
 
 parseRouteComp :: Parser ApiRouteComp

@@ -54,11 +54,6 @@ checkModules modules =
                               when (length tvars /= length qtArgs) $
                                    throwError $
                                    "Type " ++ show qt ++ " got applied wrong number of arguments in " ++ currentMStr
-           checkHeader h =
-               case ah_value h of
-                 ApiHeaderValueDynamic t ->
-                   isValidType [] t
-                 _ -> return ()
            checkRoute r =
                case r of
                  ApiRouteDynamic t ->
@@ -75,12 +70,10 @@ checkModules modules =
                  forM_ (sd_fields sd) $ \fld ->
                  isValidType (sd_args sd) (sf_type fld)
        forM_ (m_apis m) $ \api ->
-          do mapM_ checkHeader (ad_headers api)
-             forM_ (ad_endpoints api) $ \ep ->
-               do mapM_ checkHeader (aed_headers ep)
-                  mapM_ (isValidType []) (aed_req ep)
-                  isValidType [] (aed_resp ep)
-                  mapM_ checkRoute (aed_route ep)
+          forM_ (ad_endpoints api) $ \ep ->
+          do mapM_ (isValidType []) (aed_req ep)
+             isValidType [] (aed_resp ep)
+             mapM_ checkRoute (aed_route ep)
        return m
     where
       getDefinedTypes m =

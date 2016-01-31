@@ -94,10 +94,9 @@ makeApiDef ad =
           makeHeaderField h =
             case ah_value h of
               ApiHeaderValueStatic _ -> Nothing
-              ApiHeaderValueDynamic ty ->
+              ApiHeaderValueDynamic ->
                 Just $
-                tyPrefix <> makeSafePrefixedFieldName (ah_name h) <> " :: !"
-                <> makeType ty
+                tyPrefix <> makeSafePrefixedFieldName (ah_name h) <> " :: !T.Text"
       makeEndPoint ep =
         prefix <> unEndpointName (aed_name ep) <> " :: "
         <> (if not (null $ ad_headers ad) then apiHeaderType <> " -> " else "")
@@ -129,7 +128,7 @@ makeApiDef ad =
               _ -> Nothing
           makeSetter h =
             case ah_value h of
-              ApiHeaderValueDynamic _ -> Just (varName h)
+              ApiHeaderValueDynamic -> Just (varName h)
               _ -> Nothing
       makeEndPointImpl ep =
         "hookRoute " <> (T.pack $ show $ aed_verb ep)  <> " ("

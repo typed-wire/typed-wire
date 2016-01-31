@@ -83,7 +83,7 @@ data ApiHeader
 
 data ApiHeaderValue
    = ApiHeaderValueStatic T.Text
-   | ApiHeaderValueDynamic Type
+   | ApiHeaderValueDynamic
      deriving (Show, Eq)
 
 data TypeDef
