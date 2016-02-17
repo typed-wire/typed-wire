@@ -9,7 +9,7 @@ typed-wire
 Hackage: [typed-wire](http://hackage.haskell.org/package/typed-wire)
 Stackage: [typed-wire](https://www.stackage.org/package/typed-wire)
 
-Language idependent type-safe communication
+Language independent type-safe communication
 
 ## Motivation / WIP Notice
 
