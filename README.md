@@ -11,6 +11,15 @@ Stackage: [typed-wire](https://www.stackage.org/package/typed-wire)
 
 Language idependent type-safe communication
 
+## Motivation / WIP Notice
+
+Here are some details on the library:
+
+* I wrote this because I have more and more micro-service architectures. The simplest form is a Haskell (REST-Api) Backend talking with an Elm/Purescript/... frontend. I got really tired of defining all data types in Haskell, Elm, PureScript, ... and writing JSON parsing/serialization functions for them in all languages. typed-wire attempts to solve this/my problem: It generates type definitions and matching JSON parsing/serialization for all target languages from a definition file. It can also generate API definitions, but this feature is not finished yet.
+* It's not ready yet - it is still missing some planned features, testing and documentation
+* It's used in production at one of my projects to ensure DRY type-safe communication between an Elm client and a Haskell server (www.bahn-buddy.de , german)
+* If anyone thinks this is cool, needs it too and would like to help out please shoot me an email :-)
+
 ## Cli Usage: twirec
 
 ```sh
