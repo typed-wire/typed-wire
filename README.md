@@ -28,7 +28,7 @@ Generate bindings using typed-wire for different languages
 
 Usage: twirec [--version] [-i|--include-dir DIR] [-e|--entrypoint MODULE-NAME]
               [--hs-out DIR] [--elm-out DIR] [--purescript-out DIR]
-  Language idependent type-safe communication
+  Language-independent type-safe communication
 
 Available options:
   -h,--help                Show this help text

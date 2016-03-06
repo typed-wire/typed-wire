@@ -79,7 +79,7 @@ main =
       opts =
           info (helper <*> optParser)
           ( fullDesc
-          <> progDesc "Language idependent type-safe communication"
+          <> progDesc "Language-independent type-safe communication"
           <> header "Generate bindings using typed-wire for different languages"
           )
 

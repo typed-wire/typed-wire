@@ -1,6 +1,6 @@
 name:                typed-wire
 version:             0.3.0.0
-synopsis:            Language idependent type-safe communication
+synopsis:            Language-independent type-safe communication
 description:         Please see README.md
 homepage:            http://github.com/typed-wire/typed-wire#readme
 license:             MIT
