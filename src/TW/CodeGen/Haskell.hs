@@ -20,7 +20,7 @@ import qualified Data.List as L
 import qualified Data.Text as T
 
 libraryInfo :: LibraryInfo
-libraryInfo = LibraryInfo "typed-wire-utils" "0.1.0.0"
+libraryInfo = LibraryInfo "Haskell" "typed-wire-utils" "0.1.0.0"
 
 aesonQual :: T.Text
 aesonQual = "Data_Aeson_Lib"
