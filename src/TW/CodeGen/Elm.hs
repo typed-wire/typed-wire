@@ -33,7 +33,7 @@ makeFileName (ModuleName parts) =
     (L.foldl' (</>) "" $ map T.unpack parts) ++ ".elm"
 
 libraryInfo :: LibraryInfo
-libraryInfo = LibraryInfo "elm-typed-wire-utils" "1.0.0"
+libraryInfo = LibraryInfo "Elm" "elm-typed-wire-utils" "1.0.0"
 
 makeModule :: Module -> T.Text
 makeModule m =

@@ -19,7 +19,7 @@ import qualified Data.List as L
 import qualified Data.Text as T
 
 libraryInfo :: LibraryInfo
-libraryInfo = LibraryInfo "purescript-typed-wire" "0.2.0"
+libraryInfo = LibraryInfo "Purescript" "purescript-typed-wire" "0.2.0"
 
 makeFileName :: ModuleName -> FilePath
 makeFileName (ModuleName parts) =
