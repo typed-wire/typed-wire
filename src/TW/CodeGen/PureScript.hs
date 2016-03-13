@@ -153,7 +153,7 @@ makeStructDef sd =
     , "instance " <> showName (sd_name sd) <> " :: "
       <> tcPreds (sd_args sd) ["Show"] <> "Show (" <> fullType <> ") where "
       <> "show (" <> justType <> " a) = " <> T.pack (show justType) <> " ++ \"{\" ++ "
-      <> T.intercalate " ++ " (map makeFieldShow (sd_fields sd))
+      <> T.intercalate " ++ \", \" ++ " (map makeFieldShow (sd_fields sd))
       <> " ++ \"}\""
     , "instance " <> encoderName (sd_name sd) <> " :: "
       <> tcPreds (sd_args sd) ["EncodeJson"] <> "EncodeJson" <> " (" <> fullType <> ") where"
@@ -232,7 +232,7 @@ makeEnumDef ed =
           let constr = unChoiceName $ ec_name ec
           in case ec_arg ec of
                  Nothing -> "show (" <> constr <> ") = " <> T.pack (show constr)
-                 Just _ -> "show (" <> constr <> " a) = " <> T.pack (show constr) <> " ++ show a"
+                 Just _ -> "show (" <> constr <> " a) = " <> T.pack (show constr) <> " ++ \" \" ++ show a"
       makeChoiceEq ec =
           let constr = unChoiceName $ ec_name ec
           in case ec_arg ec of
