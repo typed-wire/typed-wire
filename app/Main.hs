@@ -1,36 +1,35 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TemplateHaskell   #-}
 module Main where
 
-import Control.Monad (forM_)
 import TW.Ast
 import TW.Check
-import TW.Loader
-import TW.Parser
-import TW.Types
 import qualified TW.CodeGen.Elm as Elm
 import qualified TW.CodeGen.Haskell as HS
 import qualified TW.CodeGen.PureScript as PS
+import TW.Loader
+import TW.Parser
+import TW.Types
 
 import qualified Paths_typed_wire as Meta
 
+import Control.Monad (forM_)
+import qualified Data.Text as T
+import qualified Data.Text.IO as T
+import qualified Data.Version as Vers
 import Development.GitRev
 import Options.Applicative
 import System.Directory
 import System.FilePath
-import qualified Data.Text as T
-import qualified Data.Text.IO as T
-import qualified Data.Traversable as T
-import qualified Data.Version as Vers
 
 data Options
    = Options
    { o_showVersion :: Bool
-   , o_sourceDirs :: [FilePath]
+   , o_sourceDirs  :: [FilePath]
    , o_entryPoints :: [ModuleName]
-   , o_hsOutDir :: Maybe FilePath
-   , o_elmOutDir :: Maybe FilePath
-   , o_psOutDir :: Maybe FilePath
+   , o_hsOutDir    :: Maybe FilePath
+   , o_elmOutDir   :: Maybe FilePath
+   , o_psOutDir    :: Maybe FilePath
    }
 
 optParser :: Parser Options
@@ -112,21 +111,21 @@ run' opts =
              case checkModules ok of
                Left err -> fail err
                Right readyModules ->
-                   do
-                     forM_ (o_hsOutDir opts) $ \dir -> do
-                         printLibraryInfo HS.libraryInfo
-                         mapM_ (runner dir HS.makeModule HS.makeFileName) readyModules
-                     forM_ (o_elmOutDir opts) $ \dir -> do
-                         printLibraryInfo Elm.libraryInfo
-                         mapM_ (runner dir Elm.makeModule Elm.makeFileName) readyModules
-                     forM_ (o_psOutDir opts) $ \dir -> do
-                         printLibraryInfo PS.libraryInfo
-                         mapM_ (runner dir PS.makeModule PS.makeFileName) readyModules
-                     return ()
+                 do
+                   forM_ (o_hsOutDir opts) $ \dir ->
+                     do printLibraryInfo HS.libraryInfo
+                        mapM_ (runner dir HS.makeModule HS.makeFileName) readyModules
+                   forM_ (o_elmOutDir opts) $ \dir ->
+                     do printLibraryInfo Elm.libraryInfo
+                        mapM_ (runner dir Elm.makeModule Elm.makeFileName) readyModules
+                   forM_ (o_psOutDir opts) $ \dir ->
+                     do printLibraryInfo PS.libraryInfo
+                        mapM_ (runner dir PS.makeModule PS.makeFileName) readyModules
+                   return ()
 
 printLibraryInfo :: LibraryInfo -> IO ()
 printLibraryInfo li = T.putStrLn $
-    "Required " <> li_type li <>
+    "Required " <> li_type li <> " " <>
     li_name li <> " version " <> li_version li
 
 runner :: FilePath -> (Module -> T.Text) -> (ModuleName -> FilePath) -> Module -> IO ()
