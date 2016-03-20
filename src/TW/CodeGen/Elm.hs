@@ -33,7 +33,7 @@ makeFileName (ModuleName parts) =
     (L.foldl' (</>) "" $ map T.unpack parts) ++ ".elm"
 
 libraryInfo :: LibraryInfo
-libraryInfo = LibraryInfo "Elm" "elm-typed-wire-utils" "1.0.0"
+libraryInfo = LibraryInfo "Elm" "elm-typed-wire-utils" "2.0.0"
 
 makeModule :: Module -> T.Text
 makeModule m =
@@ -43,7 +43,7 @@ makeModule m =
     , ""
     , T.intercalate "\n" (map makeImport $ m_imports m)
     , ""
-    , "import TypedWire as ELib"
+    , "import TypedWire as TW"
     , "import List as L"
     , "import Json.Decode as " <> jsonDecQual
     , "import Json.Decode exposing ((:=))"
@@ -185,10 +185,10 @@ jsonEncFor t =
           | bi == tyInt -> jsonEnc "int"
           | bi == tyBool -> jsonEnc "bool"
           | bi == tyFloat -> jsonEnc "float"
-          | bi == tyBytes -> "ELib.jencAsBase64"
-          | bi == tyDateTime -> "ELib.jencDateTime"
-          | bi == tyTime -> "ELib.jencTime"
-          | bi == tyDate -> "ELib.jencDate"
+          | bi == tyBytes -> "TW.encAsBase64"
+          | bi == tyDateTime -> "TW.encDateTime"
+          | bi == tyTime -> "TW.encTime"
+          | bi == tyDate -> "TW.encDate"
           | bi == tyList ->
               case tvars of
                 [arg] ->
@@ -196,7 +196,7 @@ jsonEncFor t =
                 _ -> error $ "Elm: odly shaped List value"
           | bi == tyMaybe ->
               case tvars of
-                [arg] -> "ELib.encMaybe (" <> jsonEncFor arg <> ")"
+                [arg] -> "TW.encMaybe (" <> jsonEncFor arg <> ")"
                 _ -> error $ "Elm: odly shaped Maybe value"
           | otherwise ->
               error $ "Elm: Missing jsonEnc for built in type: " ++ show t
@@ -217,18 +217,18 @@ jsonDecFor t =
           | bi == tyInt -> jsonDec "int"
           | bi == tyBool -> jsonDec "bool"
           | bi == tyFloat -> jsonDec "float"
-          | bi == tyBytes -> "ELib.jdecAsBase64"
-          | bi == tyDateTime -> "ELib.jdecDateTime"
-          | bi == tyTime -> "ELib.jdecTime"
-          | bi == tyDate -> "ELib.jdecDate"
+          | bi == tyBytes -> "TW.decAsBase64"
+          | bi == tyDateTime -> "TW.decDateTime"
+          | bi == tyTime -> "TW.decTime"
+          | bi == tyDate -> "TW.decDate"
           | bi == tyList ->
               case tvars of
                 [arg] -> jsonDec "list" <> " (" <> jsonDecFor arg <> ")"
-                _ -> error $ "Elm: odly shaped List value"
+                _ -> error "Elm: odly shaped List value"
           | bi == tyMaybe ->
               case tvars of
                 [arg] -> jsonDec "maybe" <> " (" <> jsonDecFor arg <> ")"
-                _ -> error $ "Elm: odly shaped Maybe value"
+                _ -> error "Elm: odly shaped Maybe value"
           | otherwise ->
               error $ "Elm: Missing jsonDec for built in type: " ++ show t
 
@@ -254,12 +254,12 @@ makeType t =
           | bi == tyInt -> "Int"
           | bi == tyBool -> "Bool"
           | bi == tyFloat -> "Float"
-          | bi == tyDateTime -> "ELib.DateTime"
-          | bi == tyTime -> "ELib.Time"
-          | bi == tyDate -> "ELib.Date"
+          | bi == tyDateTime -> "TW.DateTime"
+          | bi == tyTime -> "TW.Time"
+          | bi == tyDate -> "TW.Date"
           | bi == tyMaybe -> "(Maybe " <> T.intercalate " " (map makeType tvars) <> ")"
           | bi == tyList -> "(List " <> T.intercalate " " (map makeType tvars) <> ")"
-          | bi == tyBytes -> "ELib.AsBase64"
+          | bi == tyBytes -> "TW.AsBase64"
           | otherwise ->
               error $ "Elm: Unimplemented built in type: " ++ show t
 
