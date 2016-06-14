@@ -77,8 +77,8 @@ makeStructDef sd =
     , "jencTuples" <> unTypeName (sd_name sd) <> " " <> encArgs <> " x ="
     , "    [ " <> T.intercalate "\n    , " (map makeToJsonFld $ sd_fields sd)
     , "    ]"
-    , "jdec" <> unTypeName (sd_name sd) <> " : " <> jsonDec "Decoder" <> " (" <> fullType <> ")"
-    , "jdec" <> unTypeName (sd_name sd) <> " ="
+    , "jdec" <> unTypeName (sd_name sd) <> " : " <> decTy <> jsonDec "Decoder" <> " (" <> fullType <> ")"
+    , "jdec" <> unTypeName (sd_name sd) <> " " <> decArgs <> " ="
     , "    " <> T.intercalate "\n    " (map makeFromJsonFld $ sd_fields sd)
     , "    " <> jsonDec "succeed" <> " (" <> unTypeName (sd_name sd) <> " " <> funArgs <> ")"
     ]
@@ -91,6 +91,14 @@ makeStructDef sd =
                         "(" <> v <> " -> " <> jsonEnc "Value" <> ")"
                 in ( T.intercalate " -> " (map mkEncTy $ sd_args sd) <> " -> "
                    , T.intercalate " " (map varEnc $ sd_args sd)
+                   )
+      (decTy, decArgs) =
+          case sd_args sd of
+            [] -> ("", "")
+            _ ->
+                let mkDecTy (TypeVar v) = "(JD.Decoder " <> v <> ")"
+                in ( T.intercalate " -> " (map mkDecTy $ sd_args sd) <> " -> "
+                   , T.intercalate " " (map varDec $ sd_args sd)
                    )
       jArg fld = "j_" <> (unFieldName $ sf_name fld)
       makeFromJsonFld fld =

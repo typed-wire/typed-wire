@@ -4,3 +4,9 @@ type Person {
   name : String;
   age : Int;
 }
+
+type MultiParam<a, b, c> {
+  multiParam : a;
+  multiParamB : b;
+  multiParamC : c;
+}

@@ -1,5 +1,5 @@
 name:                typed-wire
-version:             0.3.1.0
+version:             0.3.1.1
 synopsis:            Language-independent type-safe communication
 description:         Please see README.md
 homepage:            http://github.com/typed-wire/typed-wire#readme
