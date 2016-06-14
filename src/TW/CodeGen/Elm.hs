@@ -72,7 +72,8 @@ makeStructDef sd =
     , "   }"
     , ""
     , "jenc" <> unTypeName (sd_name sd) <> " : " <> encTy <> fullType <> " -> " <> jsonEnc "Value"
-    , "jenc" <> unTypeName (sd_name sd) <> " = " <> jsonEnc "object" <> " << " <> "jencTuples" <> unTypeName (sd_name sd)
+    , "jenc" <> unTypeName (sd_name sd) <> " " <> encArgs <> " = "
+        <> jsonEnc "object" <> " << " <> "jencTuples" <> unTypeName (sd_name sd) <> " " <> encArgs
     , "jencTuples" <> unTypeName (sd_name sd) <> " : " <> encTy <> fullType <> " -> List (String, " <> jsonEnc "Value" <> ")"
     , "jencTuples" <> unTypeName (sd_name sd) <> " " <> encArgs <> " x ="
     , "    [ " <> T.intercalate "\n    , " (map makeToJsonFld $ sd_fields sd)
