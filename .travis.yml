@@ -20,7 +20,7 @@ before_install:
   --strip-components=1 -C ~/.local/bin '*/stack'
 - stack --no-terminal setup
 install:
-- npm install -g pulp purescript bower
+- npm install -g pulp purescript@0.8.2 bower
 - stack build --only-snapshot --no-terminal
 script:
 - stack test --pedantic --no-terminal
