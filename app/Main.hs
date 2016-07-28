@@ -29,6 +29,7 @@ data Options
    , o_entryPoints :: [ModuleName]
    , o_hsOutDir    :: Maybe FilePath
    , o_elmOutDir   :: Maybe FilePath
+   , o_elmVersionInfo :: Maybe VersionInfo
    , o_psOutDir    :: Maybe FilePath
    }
 
@@ -40,6 +41,7 @@ optParser =
     <*> entryPointsP
     <*> hsOutP
     <*> elmOutP
+    <*> elmVersionP
     <*> psOutP
 
 sourceDirsP :: Parser [FilePath]
@@ -61,6 +63,11 @@ hsOutP :: Parser (Maybe FilePath)
 hsOutP =
     optional $ strOption $
     long "hs-out" <> metavar "DIR" <> help "Generate Haskell bindings to specified dir"
+
+elmVersionP :: Parser (Maybe VersionInfo)
+elmVersionP =
+    optional $ strOption $
+    long "elm-version" <> metavar "VERSION" <> help "Generate Elm bindings for a specific elm version"
 
 elmOutP :: Parser (Maybe FilePath)
 elmOutP =
@@ -117,7 +124,7 @@ run' opts =
                         mapM_ (runner dir HS.makeModule HS.makeFileName) readyModules
                    forM_ (o_elmOutDir opts) $ \dir ->
                      do printLibraryInfo Elm.libraryInfo
-                        mapM_ (runner dir Elm.makeModule Elm.makeFileName) readyModules
+                        mapM_ (runner dir (Elm.makeModule (o_elmVersionInfo opts)) Elm.makeFileName) readyModules
                    forM_ (o_psOutDir opts) $ \dir ->
                      do printLibraryInfo PS.libraryInfo
                         mapM_ (runner dir PS.makeModule PS.makeFileName) readyModules
