@@ -66,13 +66,15 @@ hsOutP =
 
 elmVersionP :: Parser (Maybe ElmVersion)
 elmVersionP =
-    option (str >>= mkElmVersion) $
-    long "elm-version" <> metavar "VERSION" <> help "Generate Elm bindings for a specific elm version"
+    mkElmVersion <$>
+    (optional $ strOption $
+    long "elm-version" <> metavar "VERSION" <> help "Generate Elm bindings for a specific elm version")
     where
-      mkElmVersion s =
-          case makeElmVersion (T.pack s) of
-            Left _ -> return Nothing
-            Right x -> return (Just x)
+      mkElmVersion (Just s) =
+        case makeElmVersion (T.pack s) of
+          Left _ -> return Elm0p16
+          Right x -> return x
+      mkElmVersion Nothing = return Elm0p16
 
 elmOutP :: Parser (Maybe FilePath)
 elmOutP =

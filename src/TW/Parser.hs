@@ -28,7 +28,7 @@ makeElmVersion inp =
     case inp of
       "0.16" -> Right Elm0p16
       "0.17" -> Right Elm0p17
-      _ -> Left (show "version did not match any supported")
+      _ -> Left "version did not match any supported"
 
 makeModuleName :: T.Text -> Either String ModuleName
 makeModuleName inp =
