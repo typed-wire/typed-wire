@@ -2,7 +2,9 @@ module TW.Types where
 
 import qualified Data.Text as T
 
-type  VersionInfo = String
+data ElmVersion
+  = Elm0p16
+  | Elm0p17
 
 data LibraryInfo
    = LibraryInfo

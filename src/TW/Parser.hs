@@ -3,10 +3,12 @@ module TW.Parser
     ( moduleFromText
     , moduleFromFile
     , makeModuleName
+    , makeElmVersion
     )
 where
 
 import TW.Ast
+import TW.Types
 
 import Data.Either
 import Data.Maybe
@@ -20,6 +22,13 @@ import qualified Data.Text.IO as T
 import qualified Text.Parsec.Token as P
 
 type Parser = Parsec T.Text ()
+
+makeElmVersion :: T.Text -> Either String ElmVersion
+makeElmVersion inp =
+    case inp of
+      "0.16" -> Right Elm0p16
+      "0.17" -> Right Elm0p17
+      _ -> Left (show "version did not match any supported")
 
 makeModuleName :: T.Text -> Either String ModuleName
 makeModuleName inp =

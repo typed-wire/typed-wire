@@ -29,7 +29,7 @@ data Options
    , o_entryPoints :: [ModuleName]
    , o_hsOutDir    :: Maybe FilePath
    , o_elmOutDir   :: Maybe FilePath
-   , o_elmVersionInfo :: Maybe VersionInfo
+   , o_elmVersionInfo :: Maybe ElmVersion
    , o_psOutDir    :: Maybe FilePath
    }
 
@@ -64,10 +64,15 @@ hsOutP =
     optional $ strOption $
     long "hs-out" <> metavar "DIR" <> help "Generate Haskell bindings to specified dir"
 
-elmVersionP :: Parser (Maybe VersionInfo)
+elmVersionP :: Parser (Maybe ElmVersion)
 elmVersionP =
-    optional $ strOption $
+    option (str >>= mkElmVersion) $
     long "elm-version" <> metavar "VERSION" <> help "Generate Elm bindings for a specific elm version"
+    where
+      mkElmVersion s =
+          case makeElmVersion (T.pack s) of
+            Left _ -> return Nothing
+            Right x -> return (Just x)
 
 elmOutP :: Parser (Maybe FilePath)
 elmOutP =
