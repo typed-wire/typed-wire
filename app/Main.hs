@@ -14,6 +14,7 @@ import TW.Types
 import qualified Paths_typed_wire as Meta
 
 import Control.Monad (forM_)
+import Data.List (intercalate)
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import qualified Data.Version as Vers
@@ -24,12 +25,13 @@ import System.FilePath
 
 data Options
    = Options
-   { o_showVersion :: Bool
-   , o_sourceDirs  :: [FilePath]
-   , o_entryPoints :: [ModuleName]
-   , o_hsOutDir    :: Maybe FilePath
-   , o_elmOutDir   :: Maybe FilePath
-   , o_psOutDir    :: Maybe FilePath
+   { o_showVersion    :: Bool
+   , o_sourceDirs     :: [FilePath]
+   , o_entryPoints    :: [ModuleName]
+   , o_hsOutDir       :: Maybe FilePath
+   , o_elmOutDir      :: Maybe FilePath
+   , o_elmVersionInfo :: Maybe ElmVersion
+   , o_psOutDir       :: Maybe FilePath
    }
 
 optParser :: Parser Options
@@ -40,6 +42,7 @@ optParser =
     <*> entryPointsP
     <*> hsOutP
     <*> elmOutP
+    <*> elmVersionP
     <*> psOutP
 
 sourceDirsP :: Parser [FilePath]
@@ -61,6 +64,14 @@ hsOutP :: Parser (Maybe FilePath)
 hsOutP =
     optional $ strOption $
     long "hs-out" <> metavar "DIR" <> help "Generate Haskell bindings to specified dir"
+
+elmVersionP :: Parser (Maybe ElmVersion)
+elmVersionP =
+  optional $ option (eitherReader makeElmVersion)
+  (long "elm-version" <> metavar "VERSION" <> help helpMsg)
+    where
+      helpMsg = "Generate Elm bindings for a specific elm version - ("++ elmVersions ++")"
+      elmVersions = intercalate ", " $ map show [Elm0p16 ..]
 
 elmOutP :: Parser (Maybe FilePath)
 elmOutP =
@@ -117,7 +128,7 @@ run' opts =
                         mapM_ (runner dir HS.makeModule HS.makeFileName) readyModules
                    forM_ (o_elmOutDir opts) $ \dir ->
                      do printLibraryInfo Elm.libraryInfo
-                        mapM_ (runner dir Elm.makeModule Elm.makeFileName) readyModules
+                        mapM_ (runner dir (Elm.makeModule (o_elmVersionInfo opts)) Elm.makeFileName) readyModules
                    forM_ (o_psOutDir opts) $ \dir ->
                      do printLibraryInfo PS.libraryInfo
                         mapM_ (runner dir PS.makeModule PS.makeFileName) readyModules
