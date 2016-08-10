@@ -14,6 +14,7 @@ import TW.Types
 import qualified Paths_typed_wire as Meta
 
 import Control.Monad (forM_)
+import Data.List (intercalate)
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import qualified Data.Version as Vers
@@ -24,13 +25,13 @@ import System.FilePath
 
 data Options
    = Options
-   { o_showVersion :: Bool
-   , o_sourceDirs  :: [FilePath]
-   , o_entryPoints :: [ModuleName]
-   , o_hsOutDir    :: Maybe FilePath
-   , o_elmOutDir   :: Maybe FilePath
+   { o_showVersion    :: Bool
+   , o_sourceDirs     :: [FilePath]
+   , o_entryPoints    :: [ModuleName]
+   , o_hsOutDir       :: Maybe FilePath
+   , o_elmOutDir      :: Maybe FilePath
    , o_elmVersionInfo :: Maybe ElmVersion
-   , o_psOutDir    :: Maybe FilePath
+   , o_psOutDir       :: Maybe FilePath
    }
 
 optParser :: Parser Options
@@ -66,15 +67,11 @@ hsOutP =
 
 elmVersionP :: Parser (Maybe ElmVersion)
 elmVersionP =
-    mkElmVersion <$>
-    (optional $ strOption $
-    long "elm-version" <> metavar "VERSION" <> help "Generate Elm bindings for a specific elm version")
+  optional $ option (eitherReader makeElmVersion)
+  (long "elm-version" <> metavar "VERSION" <> help helpMsg)
     where
-      mkElmVersion (Just s) =
-        case makeElmVersion (T.pack s) of
-          Left _ -> return Elm0p16
-          Right x -> return x
-      mkElmVersion Nothing = return Elm0p16
+      helpMsg = "Generate Elm bindings for a specific elm version - ("++ elmVersions ++")"
+      elmVersions = intercalate ", " $ map show [Elm0p16 ..]
 
 elmOutP :: Parser (Maybe FilePath)
 elmOutP =

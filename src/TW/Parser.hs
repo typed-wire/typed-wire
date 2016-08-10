@@ -20,15 +20,18 @@ import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import qualified Data.Text.IO as T
 import qualified Text.Parsec.Token as P
+import Data.List (intercalate)
 
 type Parser = Parsec T.Text ()
 
-makeElmVersion :: T.Text -> Either String ElmVersion
+makeElmVersion :: String -> Either String ElmVersion
 makeElmVersion inp =
     case inp of
       "0.16" -> Right Elm0p16
       "0.17" -> Right Elm0p17
-      _ -> Left "version did not match any supported"
+      _ -> Left $ "version did not match any supported ("++ elmVersions ++")"
+    where
+      elmVersions = intercalate ", " $ map show [Elm0p16 ..]
 
 makeModuleName :: T.Text -> Either String ModuleName
 makeModuleName inp =
