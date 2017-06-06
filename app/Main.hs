@@ -7,6 +7,7 @@ import TW.Check
 import qualified TW.CodeGen.Elm as Elm
 import qualified TW.CodeGen.Haskell as HS
 import qualified TW.CodeGen.PureScript as PS
+import qualified TW.CodeGen.Flow as Flow
 import TW.Loader
 import TW.Parser
 import TW.Types
@@ -32,6 +33,7 @@ data Options
    , o_elmOutDir      :: Maybe FilePath
    , o_elmVersionInfo :: Maybe ElmVersion
    , o_psOutDir       :: Maybe FilePath
+   , o_flowOutDir       :: Maybe FilePath
    }
 
 optParser :: Parser Options
@@ -44,6 +46,7 @@ optParser =
     <*> elmOutP
     <*> elmVersionP
     <*> psOutP
+    <*> flowOutP
 
 sourceDirsP :: Parser [FilePath]
 sourceDirsP =
@@ -82,6 +85,11 @@ psOutP :: Parser (Maybe FilePath)
 psOutP =
     optional $ strOption $
     long "purescript-out" <> metavar "DIR" <> help "Generate PureScript bindings to specified dir"
+
+flowOutP :: Parser (Maybe FilePath)
+flowOutP =
+    optional $ strOption $
+    long "flow-out" <> metavar "DIR" <> help "Generate Flow bindings to specified dir"
 
 main :: IO ()
 main =
@@ -132,6 +140,8 @@ run' opts =
                    forM_ (o_psOutDir opts) $ \dir ->
                      do printLibraryInfo PS.libraryInfo
                         mapM_ (runner dir PS.makeModule PS.makeFileName) readyModules
+                   forM_ (o_flowOutDir opts) $ \dir ->
+                     mapM_ (runner dir Flow.makeModule Flow.makeFileName) readyModules
                    return ()
 
 printLibraryInfo :: LibraryInfo -> IO ()
