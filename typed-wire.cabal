@@ -27,6 +27,7 @@ library
                   TW.CodeGen.Elm,
                   TW.CodeGen.Haskell,
                   TW.CodeGen.PureScript,
+                  TW.CodeGen.Flow,
                   TW.Types,
                   TW.Utils
   build-depends:
