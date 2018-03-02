@@ -45,6 +45,8 @@ executable twirec
   hs-source-dirs:      app
   main-is:             Main.hs
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  other-modules:
+                  Paths_typed_wire
   build-depends:
                 base >= 4.7 && < 5,
                 typed-wire,
@@ -62,6 +64,7 @@ test-suite typed-wire-tests
   other-modules:
     TW.CodeGen.HaskellTest
     TW.CodeGen.PureScriptTest
+    Paths_typed_wire
   build-depends:
                 base
               , aeson
